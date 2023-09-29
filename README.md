@@ -12,7 +12,7 @@ npm i re-gauge
 
 ```html
 <script type="module">
-  import 're-gauge/re-gauge.js';
+  import 're-gauge/widget-gauge.js';
 </script>
 
 <re-gauge></re-gauge>
