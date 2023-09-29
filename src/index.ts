@@ -1,1 +1,1 @@
-export { ReGauge } from './ReGauge.js';
+export { WidgetGauge } from './WidgetGauge.js';

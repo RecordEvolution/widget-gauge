@@ -23,7 +23,7 @@ declare global {
   }
 }
 
-export class ReGauge extends LitElement {
+export class WidgetGauge extends LitElement {
   
   @property() inputData = {} as InputData
 
