@@ -1,21 +1,21 @@
-# \<re-gauge>
+# \<widget-gauge>
 
 This webcomponent follows the [open-wc](https://github.com/open-wc/open-wc) recommendation.
 
 ## Installation
 
 ```bash
-npm i re-gauge
+npm i widget-gauge
 ```
 
 ## Usage
 
 ```html
 <script type="module">
-  import 're-gauge/widget-gauge.js';
+  import 'widget-gauge/widget-gauge.js';
 </script>
 
-<re-gauge></re-gauge>
+<widget-gauge></widget-gauge>
 ```
 
 ## Expected data format

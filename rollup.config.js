@@ -6,7 +6,7 @@ import babel from "@rollup/plugin-babel";
 export default {
     // if you use createSpaConfig, you can use your index.html as entrypoint,
     // any <script type="module"> inside will be bundled by rollup
-    input: './src/re-gauge.ts',
+    input: './src/widget-gauge.ts',
     output: {
         dir: './dist',
         name: 'regauge_bundle',

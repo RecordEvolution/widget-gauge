@@ -1,3 +1,3 @@
 import { ReGauge } from './ReGauge.js';
 
-window.customElements.define('re-gauge', ReGauge);
+window.customElements.define('widget-gauge', ReGauge);

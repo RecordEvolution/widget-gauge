@@ -170,8 +170,8 @@ export class ReGauge extends LitElement {
   }
 
   /**
-   * --re-gauge-text-color
-   * --re-gauge-background-color
+   * --widget-gauge-text-color
+   * --widget-gauge-background-color
    * 
    * */ 
 
@@ -179,14 +179,14 @@ export class ReGauge extends LitElement {
     :host {
       display: inline-block;
       margin: 16px;
-      color: var(--re-gauge-text-color, #000);
+      color: var(--widget-gauge-text-color, #000);
       font-family: sans-serif;
       max-width: 500px;
       width: 100%;
     }
 
     div#wrapper {
-      background: var(--re-gauge-background-color, #eaeaea);
+      background: var(--widget-gauge-background-color, #eaeaea);
       padding: 16px;
       box-sizing: border-box;
       border-radius: 8px;
