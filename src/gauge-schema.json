@@ -1,6 +1,6 @@
 {
-    "title": "gauge-chart",
-    "description": "A gauge-chart",
+    "title": "Gauge-chart",
+    "description": "Configure the gauge-chart.",
     "type": "object",
     "properties": {
         "settings": {
@@ -9,10 +9,10 @@
             "type": "object",
             "properties": {
                 "title": {
-                "type": "string"
+                    "type": "string"
                 },
                 "subTitle": {
-                "type": "string"
+                    "type": "string"
                 },
                 "minGauge": {
                     "type": "number"

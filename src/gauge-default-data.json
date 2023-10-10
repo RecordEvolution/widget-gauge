@@ -1,18 +1,18 @@
 {
-    "settings": {
-      "title": "Gauge-chart",
-      "subTitle": "This is a Gauge-chart from the RE-Dahsboard",
-      "minGauge": 0,
-      "maxGauge": 100,
-      "data": 30
-    },
-    "style": {
-      "sections": 3,
-      "needleColor": "#fff",
-      "backgroundColor": [
-        "rgba(255, 99, 132, 0.3)",
-        "rgba(255, 206, 86, 0.3)",
-        "rgba(63, 191, 63, 0.3)"
-      ]
-    }
+  "settings": {
+    "title": "Gauge-chart",
+    "subTitle": "This is a Gauge-chart from the RE-Dahsboard",
+    "minGauge": 1,
+    "maxGauge": 100,
+    "data": 30
+  },
+  "style": {
+    "sections": 3,
+    "needleColor": "#fff",
+    "backgroundColor": [
+      "rgba(255, 99, 132, 0.3)",
+      "rgba(255, 206, 86, 0.3)",
+      "rgba(63, 191, 63, 0.3)"
+    ]
   }
+}
