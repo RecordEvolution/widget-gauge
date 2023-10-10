@@ -1,0 +1,51 @@
+{
+    "title": "gauge-chart",
+    "description": "A gauge-chart",
+    "type": "object",
+    "properties": {
+        "settings": {
+            "title": "Settings",
+            "description": "These are available settings for the gauge chart",
+            "type": "object",
+            "properties": {
+                "title": {
+                "type": "string"
+                },
+                "subTitle": {
+                "type": "string"
+                },
+                "minGauge": {
+                    "type": "number"
+                },
+                "maxGauge": {
+                    "type": "number"
+                },
+                "data": {
+                    "type": "number"
+                }
+            }
+        },
+        "style": {
+            "title": "Style",
+            "description": "This is the style to adjust for the gauge chart",
+            "type": "object",
+            "properties": {
+                "needleColor": {
+                    "type": "string"
+                },
+                "sections": {
+                    "type": "number"
+                },
+                "backgroundColor": {
+                    "title": "Background color Array",
+                    "description": "Here you can define background colors",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "required": []
+}
