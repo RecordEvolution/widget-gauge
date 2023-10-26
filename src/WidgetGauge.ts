@@ -15,6 +15,7 @@ declare global {
     needleColor: string;
     sections: number;
     backgroundColor: string[];
+    labels: string[];
   }
 
   interface InputData {
@@ -40,7 +41,7 @@ export class WidgetGauge extends LitElement {
   @state()
   private max: number = 100;
   @state()
-  private needleColor: string = '#000';
+  private needleColor: string = 'grey';
   @state()
   private sections: number = 3;
   @state()
@@ -49,9 +50,15 @@ export class WidgetGauge extends LitElement {
   private gaugeDescription: string = 'This is a Gauge-chart from the RE-Dahsboard';
   @state()
   private backgroundColor: string[] = [
-      'rgba(255, 99, 132, 0.3)',
-      'rgba(255, 206, 86, 0.3)',
-      'rgba(63, 191, 63, 0.3)'
+      '#AAC8A7',
+      '#F1C27B',
+      '#FF9B9B'
+    ]
+  @state()
+  private labels: string[] = [
+      'Green',
+      'Orange',
+      'Red'
     ]
 
   updated(changedProperties: Map<string, any>) {
@@ -81,6 +88,7 @@ export class WidgetGauge extends LitElement {
     this.needleColor = this.inputData.style.needleColor ? this.inputData.style.needleColor : this.needleColor
     this.sections = this.inputData.style.sections ? this.inputData.style.sections : this.sections
     this.backgroundColor = this.inputData.style.backgroundColor ? this.inputData.style.backgroundColor : this.backgroundColor
+    this.labels = this.inputData.style.labels ? this.inputData.style.labels : this.labels
 
   }
 
@@ -106,7 +114,7 @@ export class WidgetGauge extends LitElement {
         {
           type: 'doughnut',
           data: {
-            labels: [],
+            labels: this.labels,
             datasets: [{
               data: this.getArea() as number[],
               //@ts-ignore

@@ -8,11 +8,16 @@
   },
   "style": {
     "sections": 3,
-    "needleColor": "#fff",
+    "needleColor": "grey",
+    "labels": [
+      "Green",
+      "Orange",
+      "Red"
+    ],
     "backgroundColor": [
-      "rgba(255, 99, 132, 0.3)",
-      "rgba(255, 206, 86, 0.3)",
-      "rgba(63, 191, 63, 0.3)"
+      "#AAC8A7",
+      "#F1C27B",
+      "#FF9B9B"
     ]
   }
 }

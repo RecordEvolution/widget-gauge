@@ -34,11 +34,21 @@
                     "type": "string"
                 },
                 "sections": {
+                    "title": "Sections",
+                    "description": "The amount of gauge sections",
                     "type": "number"
                 },
+                "labels": {
+                    "title": "Section Labels",
+                    "description": "Label description for each section",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "backgroundColor": {
-                    "title": "Background color Array",
-                    "description": "Here you can define background colors",
+                    "title": "Section background colors",
+                    "description": "Background color for each section",
                     "type": "array",
                     "items": {
                         "type": "string"
