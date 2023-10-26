@@ -222,7 +222,7 @@ export class WidgetGauge extends LitElement {
           <h3>${this.gaugeTitle}</h3>
           <p>${this.gaugeDescription}</p>
         </header>
-        <canvas id="gauge"></canvas>
+        <canvas id="gauge" height="214"></canvas>
         <div id="currentValue">${this.needleValue}</div>
       </div>
     `;
