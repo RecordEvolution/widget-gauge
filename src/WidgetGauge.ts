@@ -209,7 +209,6 @@ export class WidgetGauge extends LitElement {
     #currentValue {
       margin: 0 auto;
       text-align: center;
-      margin-top: 10px;
       font-size: x-large;
       font-weight: 600;
     }
