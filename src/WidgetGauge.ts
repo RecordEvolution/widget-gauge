@@ -77,7 +77,7 @@ export class WidgetGauge extends LitElement {
   }
 
   createGaugeData() {
-    if(!this.inputData.settings || !this.inputData.settings.data) return
+    if(!this.inputData?.settings || !this.inputData?.settings?.data) return
     this.needleValue = this.inputData.settings.data ? this.inputData.settings.data : this.needleValue
     this.min = this.inputData.settings.minGauge ? this.inputData.settings.minGauge : this.min
     this.max = this.inputData.settings.maxGauge ? this.inputData.settings.maxGauge : this.max
