@@ -142,6 +142,8 @@ export class WidgetGauge extends LitElement {
               var ctx = chart.ctx;
               var cw = chart.canvas.offsetWidth;
               var ch = chart.canvas.offsetHeight;
+              // var cw = this.offsetWidth;
+              // var ch = this.offsetHeight;
               var cx = cw / 2;
               var cy = ch - 6;
         
@@ -178,13 +180,16 @@ export class WidgetGauge extends LitElement {
   static styles = css`
     :host {
       display: inline-block;
-      margin: 16px;
       color: var(--widget-gauge-text-color, #000);
       font-family: sans-serif;
-      max-width: 500px;
-      width: 100%;
+      padding: 16px;
+      box-sizing: border-box;
+      position: relative;
+      margin: auto;
     }
-
+    #gauge {
+      margin: 0 auto;
+    }
     header {
       display: flex;
       flex-direction: column;
@@ -203,9 +208,6 @@ export class WidgetGauge extends LitElement {
       font-size: 14px;
       line-height: 17px;
     }
-    canvas {
-      margin: 0 auto;
-    }
     #currentValue {
       margin: 0 auto;
       text-align: center;
@@ -217,14 +219,12 @@ export class WidgetGauge extends LitElement {
 
   render() {
     return html`
-      <div id="wrapper">
-        <header>
-          <h3>${this.gaugeTitle}</h3>
-          <p>${this.gaugeDescription}</p>
-        </header>
-        <canvas id="gauge" height="214"></canvas>
-        <div id="currentValue">${this.needleValue}</div>
-      </div>
+      <header>
+        <h3>${this.gaugeTitle}</h3>
+        <p>${this.gaugeDescription}</p>
+      </header>
+      <canvas id="gauge"></canvas>
+      <div id="currentValue">${this.needleValue}</div>
     `;
   }
 }
