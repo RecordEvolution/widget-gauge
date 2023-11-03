@@ -26,34 +26,45 @@ declare global {
 
 export class WidgetGauge extends LitElement {
   
-  @property() inputData = {} as InputData
+  @property() inputData: any = {}
 
   @state()
   private demoCanvas: HTMLCanvasElement | undefined = undefined;
+
   @state()
   private chartInstance: Chart | undefined = undefined;
+
   @state()
   private dataTotal: number = 100;
+
   @state()
   private needleValue: number = 50;
+
   @state()
   private min: number = 0;
+
   @state()
   private max: number = 100;
+
   @state()
   private needleColor: string = 'grey';
+
   @state()
   private sections: number = 3;
+
   @state()
   private gaugeTitle: string = 'Gauge-chart';
+
   @state()
   private gaugeDescription: string = 'This is a Gauge-chart from the RE-Dahsboard';
+
   @state()
   private backgroundColor: string[] = [
       '#AAC8A7',
       '#F1C27B',
       '#FF9B9B'
     ]
+
   @state()
   private labels: string[] = [
       'Green',
@@ -71,7 +82,6 @@ export class WidgetGauge extends LitElement {
             }
             this.createGaugeData()
             this.renderChart()
-          return
       }
     })
   }
@@ -96,7 +106,7 @@ export class WidgetGauge extends LitElement {
     if(this.max == null || this.min == null) return [100]
     const section = (this.max - this.min) / this.sections
     let sectioneArray = []
-    for (let i = 0; i < this.sections; i++) {
+    for (let i:number = 0; i < this.sections; i++) {
       sectioneArray.push(section)
     }
     return sectioneArray
@@ -124,7 +134,7 @@ export class WidgetGauge extends LitElement {
           },
   
           options: {
-            responsive: false,
+            responsive: true,
             aspectRatio: 2,
             layout: {
               padding: {
@@ -135,6 +145,7 @@ export class WidgetGauge extends LitElement {
             cutout: '50%',
             circumference: 180,
             animation: {
+              duration: 200,
               animateRotate: false,
               animateScale: true
             }
@@ -143,17 +154,17 @@ export class WidgetGauge extends LitElement {
           plugins: [{
             id: 'doughnut',
             afterDraw: (chart: Chart) => {
-              //@ts-ignore
+              // @ts-ignore
               // this.needleValue = chart.config.data.datasets[0].needleValue;
   
-              var angle = Math.PI + (1 / this.dataTotal * this.needleValue * Math.PI);
-              var ctx = chart.ctx;
-              var cw = chart.canvas.offsetWidth;
-              var ch = chart.canvas.offsetHeight;
-              // var cw = this.offsetWidth;
-              // var ch = this.offsetHeight;
-              var cx = cw / 2;
-              var cy = ch - 6;
+              const angle = Math.PI + (1 / this.dataTotal * this.needleValue * Math.PI);
+              const {ctx} = chart;
+              const cw = chart.canvas.offsetWidth;
+              const ch = chart.canvas.offsetHeight;
+              // const cw = this.offsetWidth;
+              // const ch = this.offsetHeight;
+              const cx = cw / 2;
+              const cy = ch - 6;
         
               ctx.translate(cx, cy);
               ctx.rotate(angle);

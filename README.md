@@ -21,7 +21,7 @@ npm i widget-gauge
 ## Expected data format
 
 The following format represents the available data :
-```
+```js
 data: {
   settings: {
     title: string,
@@ -40,13 +40,13 @@ data: {
 
 ## Interfaces
 
-```
+```ts
   interface InputData {
     settings: Settings
     gaugeValue: number
   }
 ```
-```
+```ts
   interface Settings {
     title: string,
     subTitle: string,
@@ -55,7 +55,7 @@ data: {
     style: Style
   }
 ```
-```
+```ts
   interface Style {
     needleColor: string,
     sections: number,
