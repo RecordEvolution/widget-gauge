@@ -1,32 +1,12 @@
 import { html, css, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { Chart } from 'chart.js/auto';
+import { InputData } from './types.js'
 
-declare global {
-  interface Settings {
-    title: string;
-    data: number;
-    subTitle: string;
-    minGauge: number;
-    maxGauge: number;
-  }
-
-  interface Style {
-    needleColor: string;
-    sections: number;
-    backgroundColor: string[];
-    labels: string[];
-  }
-
-  interface InputData {
-    settings: Settings
-    style: Style
-  }
-}
 
 export class WidgetGauge extends LitElement {
   
-  @property() inputData: any = {}
+  @property({type: Object}) inputData: InputData = {}
 
   @state()
   private demoCanvas: HTMLCanvasElement | undefined = undefined;
@@ -56,7 +36,7 @@ export class WidgetGauge extends LitElement {
   private gaugeTitle: string = 'Gauge-chart';
 
   @state()
-  private gaugeDescription: string = 'This is a Gauge-chart from the RE-Dahsboard';
+  private gaugeDescription: string = 'This is a Gauge-chart from the RE-Dashboard';
 
   @state()
   private backgroundColor: string[] = [
@@ -87,25 +67,25 @@ export class WidgetGauge extends LitElement {
   }
 
   createGaugeData() {
-    if(!this.inputData?.settings || !this.inputData?.settings?.data) return
-    this.needleValue = this.inputData.settings.data ? this.inputData.settings.data : this.needleValue
-    this.min = this.inputData.settings.minGauge ? this.inputData.settings.minGauge : this.min
-    this.max = this.inputData.settings.maxGauge ? this.inputData.settings.maxGauge : this.max
+    if(!this?.inputData?.settings || !this?.inputData?.settings?.data) return
+    this.needleValue = this.inputData.settings.data ?? this.needleValue
+    this.min = this.inputData.settings.minGauge ?? this.min
+    this.max = this.inputData.settings.maxGauge ?? this.max
     this.gaugeTitle = this.inputData.settings.title
     this.gaugeDescription = this.inputData.settings.subTitle
     this.dataTotal = this.max - this.min
 
-    this.needleColor = this.inputData.style.needleColor ? this.inputData.style.needleColor : this.needleColor
-    this.sections = this.inputData.style.sections ? this.inputData.style.sections : this.sections
-    this.backgroundColor = this.inputData.style.backgroundColor ? this.inputData.style.backgroundColor : this.backgroundColor
-    this.labels = this.inputData.style.labels ? this.inputData.style.labels : this.labels
+    this.needleColor = this.inputData.style.needleColor ?? this.needleColor
+    this.sections = this.inputData.style.sections ?? this.sections
+    this.backgroundColor = this.inputData.style.backgroundColor ?? this.backgroundColor
+    this.labels = this.inputData.style.labels ?? this.labels
 
   }
 
   getArea() {
     if(this.max == null || this.min == null) return [100]
     const section = (this.max - this.min) / this.sections
-    let sectioneArray = []
+    const sectioneArray = []
     for (let i:number = 0; i < this.sections; i++) {
       sectioneArray.push(section)
     }

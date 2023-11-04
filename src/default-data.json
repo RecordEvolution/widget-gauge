@@ -1,7 +1,7 @@
 {
   "settings": {
     "title": "Gauge-chart",
-    "subTitle": "This is a Gauge-chart from the RE-Dahsboard",
+    "subTitle": "This is a Gauge-chart from the RE-Dashboard",
     "minGauge": 1,
     "maxGauge": 100,
     "data": 30
