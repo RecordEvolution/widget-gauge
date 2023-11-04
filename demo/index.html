@@ -21,30 +21,7 @@
   <script type="module">
     import { html, render } from 'lit';
     import '../dist/src/widget-gauge.js';
-
-    const data = {
-      settings: {
-        title: 'Gauge-chart',
-        subTitle: 'This is a Gauge-chart from the RE-Dahsboard',
-        minGauge: 0,
-        maxGauge: 100,
-        data: 30,
-      },
-      style: {
-        sections: 3,
-        needleColor: 'grey',
-        backgroundColor: [
-          '#AAC8A7',
-          '#F1C27B',
-          '#FF9B9B'
-        ],
-        labels: [
-          'Green',
-          'Orange',
-          'Red'
-        ]
-      }
-    }
+    import data from '../src/default-data.json' assert { type: 'json' };
 
     render(
       html`
