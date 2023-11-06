@@ -56,7 +56,6 @@ export class WidgetGauge extends LitElement {
   async applyInputData() {
 
     if(!this?.inputData) return
-
     this.gaugeTitle = this.inputData.settings.title ?? this.gaugeTitle
     this.gaugeDescription = this.inputData.settings.subTitle ?? this.gaugeDescription
     this.dataSets = []
@@ -83,8 +82,8 @@ export class WidgetGauge extends LitElement {
 
     // filter latest values and calculate average
     this.dataSets.forEach(ds => {
-      ds.data.splice(ds.averageLatest ?? 1)
-      ds.needleValue = ds.data.map(d => d.value).reduce(( p, c ) => p + c, 0) / ds.data.length
+      ds.data = ds.data.splice(-ds.averageLatest ?? -1)
+      ds.needleValue = ds.data.map(d => d.value).reduce(( p, c ) => p + c, 0) / ds.data.length ?? ds.sections[0]
       ds.range = ds.sections[ds.sections.length -1] - ds.sections[0]
       ds.ranges = ds.sections.map((v, i, a) => v - (a?.[i-1] ?? 0)).slice(1)
     })
@@ -143,7 +142,6 @@ export class WidgetGauge extends LitElement {
       this.resizeObserver.observe(canvas)
 
       if (!canvas) return
-      console.log('using chart for ', ds)
       this.canvasList[ds.label] = new Chart(
         canvas,
         {
