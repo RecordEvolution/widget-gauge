@@ -1,23 +1,46 @@
 {
   "settings": {
     "title": "Gauge-chart",
-    "subTitle": "This is a Gauge-chart from the RE-Dashboard",
-    "minGauge": 1,
-    "maxGauge": 100,
-    "data": 30
+    "subTitle": "This shows a gauge for each dataseries"
   },
-  "style": {
-    "sections": 3,
-    "needleColor": "grey",
-    "labels": [
-      "Green",
-      "Orange",
-      "Red"
-    ],
-    "backgroundColor": [
+  "dataseries": [{
+    "label": "Demo Gauge 1",
+    "order": 1,
+    "needleColor": "black",
+    "sections": [-20, 20, 80, 98],
+    "backgroundColors": [
       "#AAC8A7",
       "#F1C27B",
       "#FF9B9B"
-    ]
-  }
+    ],
+    "averageLatest": 3,
+    "data": [{
+      "value": 90,
+      "pivot": "Frankfurt"
+    },{
+      "value": 80,
+      "pivot": "Berlin"
+    },{
+      "value": 30,
+      "pivot": "Berlin"
+    },{
+      "value": 60,
+      "pivot": "Frankfurt"
+    }]
+  },{
+    "label": "Demo Gauge 2",
+    "order": 2,
+    "needleColor": "black",
+    "sections": [50, 20, 80, 90, 200],
+    "backgroundColors": [
+      "#AAC8A7",
+      "#F1C27B",
+      "#FF9B9B",
+      "#FF919B"
+    ],
+    "averageLatest": 1,
+    "data": [{
+      "value": 60
+    }]
+  }]
 }

@@ -3,7 +3,7 @@
   "description": "REWidget widget-gauge",
   "license": "MIT",
   "author": "widget-gauge",
-  "version": "1.0.1",
+  "version": "1.4.0",
   "type": "module",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
@@ -48,35 +48,5 @@
     "tslib": "^2.6.2",
     "typescript": "^5.2.2",
     "@rollup/plugin-typescript": "^11.1.5"
-  },
-  "customElements": "custom-elements.json",
-  "eslintConfig": {
-    "parser": "@typescript-eslint/parser",
-    "extends": [
-      "@open-wc",
-      "prettier"
-    ],
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "rules": {
-      "no-new": 0,
-      "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "error"
-      ],
-      "import/no-unresolved": "off",
-      "import/extensions": [
-        "error",
-        "always",
-        {
-          "ignorePackages": true
-        }
-      ]
-    }
-  },
-  "prettier": {
-    "singleQuote": true,
-    "arrowParens": "avoid"
   }
 }

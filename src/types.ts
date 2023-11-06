@@ -1,19 +1,30 @@
+import type { Chart } from 'chart.js/auto';
+
 export interface Settings {
-    title: string;
-    data: number;
-    subTitle: string;
-    minGauge: number;
-    maxGauge: number;
+    title: string
+    subTitle: string
   }
 
-export interface Style {
-    needleColor: string;
-    sections: number;
-    backgroundColor: string[];
-    labels: string[];
+export interface Data {
+    value: number
+    pivot: string
+}
+export interface Dataseries {
+    label: string
+    order: number
+    needleColor: string
+    averageLatest: number
+    sections: number[]
+    backgroundColors: string[]
+    data: Data[]
+    // not input values
+    needleValue: number 
+    chartInstance: Chart
+    range: number
+    ranges: number[]
 }
 
 export interface InputData {
     settings: Settings
-    style: Style
+    dataseries: Dataseries[]
 }
