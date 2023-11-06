@@ -25,22 +25,28 @@ export class WidgetGauge extends LitElement {
   @state()
   private numberLabels?: NodeListOf<Element>
   @state()
+  private alignerLabels?: NodeListOf<Element>
+  @state()
   private titleLabels?: NodeListOf<Element>
 
   resizeObserver: ResizeObserver
   constructor() {
     super()
     this.resizeObserver = new ResizeObserver((ev: ResizeObserverEntry[]) => {
-      
+      console.log(ev)
       const width: number = ev[0].contentRect.width
       const height: number = ev[0].contentRect.height + 30
       
       this.numberLabels?.forEach(n => {
-        n.setAttribute("style", `width: ${width}px; top: ${height}px`)
+        n.setAttribute("style", `width: ${width}px;`)
+      })
+
+      this.alignerLabels?.forEach(n => {
+        n.setAttribute("style", `top: ${height}px`)
       })
 
       this.titleLabels?.forEach(n => {
-          n.setAttribute("style", `width: ${width}px; top: ${0}px`)
+          n.setAttribute("style", `width: ${width}px;`)
         })
     })
   }
@@ -162,15 +168,19 @@ export class WidgetGauge extends LitElement {
               }
             },
             rotation: -90,
-            cutout: '50%',
+            cutout: '40%',
             circumference: 180,
             animation: {
               duration: 200,
               animateRotate: false,
               animateScale: true
+            },
+            plugins: {
+              tooltip: {
+                enabled: false
+              }
             }
           },
-  
           plugins: [{
             id: 'doughnut',
             afterDraw: this.drawNeedle.bind(this)
@@ -178,8 +188,8 @@ export class WidgetGauge extends LitElement {
         }
       ) as Chart
     })
-
     this.numberLabels = this?.shadowRoot?.querySelectorAll('.values')
+    this.alignerLabels = this?.shadowRoot?.querySelectorAll('.aligner')
     this.titleLabels = this?.shadowRoot?.querySelectorAll('.label')
   }
 
@@ -211,6 +221,8 @@ export class WidgetGauge extends LitElement {
       flex: 1;
       overflow: hidden;
       position: relative;
+      display: flex;
+      justify-content: center;
     }
 
     .single-gauge {
@@ -219,6 +231,7 @@ export class WidgetGauge extends LitElement {
       flex: 1;
       overflow: hidden;
       position: relative;
+      align-items: stretch;
     }
 
     header {
@@ -240,7 +253,6 @@ export class WidgetGauge extends LitElement {
       line-height: 17px;
     }
     #currentValue {
-      margin: 0 auto;
       text-align: center;
       font-size: x-large;
       font-weight: 600;
@@ -252,20 +264,29 @@ export class WidgetGauge extends LitElement {
 
     .values {
       display: flex;
+      justify-content: space-around;
+    }
+
+    .aligner {
       position: absolute;
+      display: flex;
+      justify-content: center;
+      width: 100%;
     }
 
     .scale-value {
       text-align: center;
       font-size: large;
       font-weight: 400;
-      margin: 0px 11%;
+      width: 100px;
     }
 
     .label {
       text-align: center;
       position: absolute;
+      top: 10px;
     }
+
   `;
 
   render() {
@@ -284,11 +305,13 @@ export class WidgetGauge extends LitElement {
                   <canvas name="${ds.label}"></canvas>
                 </div>
                 <div class="spacer"></div>
+                <div class="aligner">
                   <div class="values">
                     <div class="scale-value">${ds.sections[0]}</div>
                     <div id="currentValue">${ds.needleValue.toFixed(0)}</div>
                     <div class="scale-value">${ds.sections[ds.sections.length-1]}</div>
                   </div>
+                </div>
               </div>
           `)}
         </div>
