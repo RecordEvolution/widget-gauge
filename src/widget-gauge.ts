@@ -168,7 +168,7 @@ export class WidgetGauge extends LitElement {
               }
             },
             rotation: -90,
-            cutout: '40%',
+            cutout: '30%',
             circumference: 180,
             animation: {
               duration: 200,
