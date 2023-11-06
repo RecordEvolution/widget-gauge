@@ -27,7 +27,6 @@ export class WidgetGauge extends LitElement {
   constructor() {
     super()
     this.resizeObserver = new ResizeObserver((ev: ResizeObserverEntry[]) => {
-      console.log('resize', ev)
       
       const width: number = ev[0].contentRect.width
       const height: number = ev[0].contentRect.height + 30
@@ -88,8 +87,6 @@ export class WidgetGauge extends LitElement {
 
     this.requestUpdate(); await this.updateComplete
 
-    console.log('Datasets', this.dataSets)
-
     // create charts
     if (!this.dataSets?.[0]?.chartInstance) {
       this.createChart()
@@ -97,7 +94,6 @@ export class WidgetGauge extends LitElement {
 
     // update chart info
     this.dataSets.forEach(ds => {
-      console.log('colors', ds.range, ds.ranges)
       if (ds.chartInstance) {
         ds.chartInstance.data.datasets[0].data = ds.ranges
         ds.chartInstance.data.datasets[0].backgroundColor = ds.backgroundColors
@@ -111,7 +107,6 @@ export class WidgetGauge extends LitElement {
       const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement;
       this.resizeObserver.observe(canvas)
 
-      console.log('ca', canvas, ds.label, `canvas[name="${ds.label}"]`)
       if (!canvas) return
       ds.chartInstance = new Chart(
         canvas,
