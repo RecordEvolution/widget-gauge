@@ -18,6 +18,29 @@ export class WidgetGauge extends LitElement {
   @state()
   private dataSets: Dataseries[] = []
 
+  @state()
+  private numberLabels?: NodeListOf<Element>
+  @state()
+  private titleLabels?: NodeListOf<Element>
+
+  resizeObserver: ResizeObserver
+  constructor() {
+    super()
+    this.resizeObserver = new ResizeObserver((ev: ResizeObserverEntry[]) => {
+      console.log('resize', ev)
+      
+      const width: number = ev[0].contentRect.width
+      const height: number = ev[0].contentRect.height + 30
+      
+      this.numberLabels?.forEach(n => {
+        n.setAttribute("style", `width: ${width}px; top: ${height}px`)
+      })
+
+      this.titleLabels?.forEach(n => {
+          n.setAttribute("style", `width: ${width}px; top: ${0}px`)
+        })
+    })
+  }
 
   updated(changedProperties: Map<string, any>) {
     changedProperties.forEach((oldValue, propName) => {
@@ -86,6 +109,8 @@ export class WidgetGauge extends LitElement {
   createChart() {
     this.dataSets.forEach(ds => {
       const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement;
+      this.resizeObserver.observe(canvas)
+
       console.log('ca', canvas, ds.label, `canvas[name="${ds.label}"]`)
       if (!canvas) return
       ds.chartInstance = new Chart(
@@ -148,11 +173,14 @@ export class WidgetGauge extends LitElement {
         }
       ) as Chart
     })
+
+    this.numberLabels = this?.shadowRoot?.querySelectorAll('.values')
+    this.titleLabels = this?.shadowRoot?.querySelectorAll('.label')
   }
 
   static styles = css`
     :host {
-      display: inline-block;
+      display: block;
       color: var(--widget-gauge-text-color, #000);
       font-family: sans-serif;
       padding: 16px;
@@ -161,11 +189,28 @@ export class WidgetGauge extends LitElement {
       margin: auto;
     }
 
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
     .gauge-container {
       display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sizer {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
     }
 
     .single-gauge {
+      display: flex;
+      flex-direction: column;
       flex: 1;
       overflow: hidden;
       position: relative;
@@ -196,40 +241,52 @@ export class WidgetGauge extends LitElement {
       font-weight: 600;
     }
 
+    .spacer {
+      height: 30px;
+    }
+
     .values {
       display: flex;
-      margin: 0px 13%;
+      position: absolute;
     }
 
     .scale-value {
       text-align: center;
       font-size: large;
       font-weight: 400;
+      margin: 0px 11%;
     }
 
     .label {
       text-align: center;
+      position: absolute;
     }
   `;
 
   render() {
     return html`
-      <header>
-        <h3>${this.gaugeTitle}</h3>
-        <p>${this.gaugeDescription}</p>
-      </header>
-      <div class="gauge-container">
-        ${repeat(this.dataSets, ds => ds.label, ds => html`
-            <div class="single-gauge">
-              <div class="label">${ds.label}</div>
-              <canvas name="${ds.label}"></canvas>
-              <div class="values">
-                <div class="scale-value">${ds.sections[0]}</div>
-                <div id="currentValue">${ds.needleValue.toFixed(0)}</div>
-                <div class="scale-value">${ds.sections[ds.sections.length-1]}</div>
+      <div class="wrapper">
+        <header>
+          <h3>${this.gaugeTitle}</h3>
+          <p>${this.gaugeDescription}</p>
+        </header>
+        <div class="gauge-container">
+          ${repeat(this.dataSets, ds => ds.label, ds => html`
+              <div class="single-gauge">
+                <div class="label">${ds.label}</div>
+                <div class="spacer"></div>
+                <div class="sizer">
+                  <canvas name="${ds.label}"></canvas>
+                </div>
+                <div class="spacer"></div>
+                  <div class="values">
+                    <div class="scale-value">${ds.sections[0]}</div>
+                    <div id="currentValue">${ds.needleValue.toFixed(0)}</div>
+                    <div class="scale-value">${ds.sections[ds.sections.length-1]}</div>
+                  </div>
               </div>
-            </div>
-        `)}
+          `)}
+        </div>
       </div>
     `;
   }
