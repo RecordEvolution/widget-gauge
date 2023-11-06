@@ -19,6 +19,10 @@ export class WidgetGauge extends LitElement {
   private dataSets: Dataseries[] = []
 
   @state()
+  private canvasList: any = {}
+
+
+  @state()
   private numberLabels?: NodeListOf<Element>
   @state()
   private titleLabels?: NodeListOf<Element>
@@ -87,19 +91,50 @@ export class WidgetGauge extends LitElement {
 
     this.requestUpdate(); await this.updateComplete
 
+    // console.log('Gauge Datasets', this.dataSets)
+
     // create charts
-    if (!this.dataSets?.[0]?.chartInstance) {
+    if (!Object.entries(this.canvasList).length) {
       this.createChart()
     }
 
     // update chart info
     this.dataSets.forEach(ds => {
-      if (ds.chartInstance) {
-        ds.chartInstance.data.datasets[0].data = ds.ranges
-        ds.chartInstance.data.datasets[0].backgroundColor = ds.backgroundColors
-        ds.chartInstance.update('none')
+      if (this.canvasList[ds.label]) {
+        this.canvasList[ds.label].data.datasets[0].data = ds.ranges
+        this.canvasList[ds.label].data.datasets[0].backgroundColor = ds.backgroundColors
+
+        this.canvasList[ds.label].update('none')
       }
     })
+  }
+
+  drawNeedle(chart: Chart) {
+      const ds: Dataseries | undefined = this.dataSets.find(ds => chart.data.datasets[0].label === ds.label)
+      if (!ds) return
+
+      const angle = Math.PI + (ds.needleValue - ds.sections[0]) / ds.range * Math.PI
+      const {ctx} = chart;
+      const cw = chart.canvas.offsetWidth;
+      const ch = chart.canvas.offsetHeight;
+      // const cw = this.offsetWidth;
+      // const ch = this.offsetHeight;
+      const cx = cw / 2;
+      const cy = ch - 6;
+
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, -3);
+      ctx.lineTo(ch - 20, 0);
+      ctx.lineTo(0, 3);
+      ctx.fillStyle = ds.needleColor;
+      ctx.fill();
+      ctx.rotate(-angle);
+      ctx.translate(-cx, -cy);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fill();
   }
 
   createChart() {
@@ -108,12 +143,14 @@ export class WidgetGauge extends LitElement {
       this.resizeObserver.observe(canvas)
 
       if (!canvas) return
-      ds.chartInstance = new Chart(
+      console.log('using chart for ', ds)
+      this.canvasList[ds.label] = new Chart(
         canvas,
         {
           type: 'doughnut',
           data: {
             datasets: [{
+              label: ds.label,
               data: ds.ranges,
               backgroundColor: ds.backgroundColors
             }]
@@ -138,32 +175,7 @@ export class WidgetGauge extends LitElement {
   
           plugins: [{
             id: 'doughnut',
-            afterDraw: (chart: Chart) => {
-              // @ts-ignore
-              // this.needleValue = chart.config.data.datasets[0].needleValue;
-              const angle = Math.PI + (ds.needleValue - ds.sections[0]) / ds.range * Math.PI
-              const {ctx} = chart;
-              const cw = chart.canvas.offsetWidth;
-              const ch = chart.canvas.offsetHeight;
-              // const cw = this.offsetWidth;
-              // const ch = this.offsetHeight;
-              const cx = cw / 2;
-              const cy = ch - 6;
-        
-              ctx.translate(cx, cy);
-              ctx.rotate(angle);
-              ctx.beginPath();
-              ctx.moveTo(0, -3);
-              ctx.lineTo(ch - 20, 0);
-              ctx.lineTo(0, 3);
-              ctx.fillStyle = ds.needleColor;
-              ctx.fill();
-              ctx.rotate(-angle);
-              ctx.translate(-cx, -cy);
-              ctx.beginPath();
-              ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-              ctx.fill();
-            }
+            afterDraw: this.drawNeedle.bind(this)
           }]
         }
       ) as Chart
