@@ -32,6 +32,11 @@
                         "description": "Determines the draw order of the gauges.",
                         "type": "number"
                     },
+                    "unit": {
+                        "title": "Unit",
+                        "description": "The unit of the values. e.g. °C or km/h",
+                        "type": "string"
+                    },
                     "sections": {
                         "title": "Sections",
                         "description": "The amount of gauge sections. Starting from the min value, ending with the max value.",

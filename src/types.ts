@@ -12,6 +12,7 @@ export interface Data {
 export interface Dataseries {
     label: string
     order: number
+    unit: string
     needleColor: string
     averageLatest: number
     sections: number[]

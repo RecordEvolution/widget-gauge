@@ -28,26 +28,33 @@ export class WidgetGauge extends LitElement {
   private alignerLabels?: NodeListOf<Element>
   @state()
   private titleLabels?: NodeListOf<Element>
+  @state()
+  private spacers?: NodeListOf<Element>
+
 
   resizeObserver: ResizeObserver
   constructor() {
     super()
     this.resizeObserver = new ResizeObserver((ev: ResizeObserverEntry[]) => {
-      console.log(ev)
       const width: number = ev[0].contentRect.width
-      const height: number = ev[0].contentRect.height + 30
-      
+      const height: number = ev[0].contentRect.height
+      const spacerHeight = width * 0.08
+
       this.numberLabels?.forEach(n => {
-        n.setAttribute("style", `width: ${width}px;`)
+        n.setAttribute("style", `font-size: ${width*0.06}px;width: ${width}px;`)
       })
 
       this.alignerLabels?.forEach(n => {
-        n.setAttribute("style", `top: ${height}px`)
+        n.setAttribute("style", `top: ${height+ spacerHeight}px`)
       })
 
       this.titleLabels?.forEach(n => {
-          n.setAttribute("style", `width: ${width}px;`)
+          n.setAttribute("style", `font-size: ${width*0.06}px; top: ${spacerHeight*0.2}px;`)
         })
+      
+      this.spacers?.forEach(n => {
+        n.setAttribute("style", `height: ${spacerHeight}px;`)
+      })
     })
   }
 
@@ -74,6 +81,8 @@ export class WidgetGauge extends LitElement {
           const pds: any = {
             label: `${ds.label} ${piv}`,
             order: ds.order,
+            unit: ds.unit,
+            averageLatest: ds.averageLatest,
             needleColor: ds.needleColor,
             sections: ds.sections,
             backgroundColors: ds.backgroundColors,
@@ -191,6 +200,7 @@ export class WidgetGauge extends LitElement {
     this.numberLabels = this?.shadowRoot?.querySelectorAll('.values')
     this.alignerLabels = this?.shadowRoot?.querySelectorAll('.aligner')
     this.titleLabels = this?.shadowRoot?.querySelectorAll('.label')
+    this.spacers = this?.shadowRoot?.querySelectorAll('.spacer')
   }
 
   static styles = css`
@@ -254,7 +264,6 @@ export class WidgetGauge extends LitElement {
     }
     #currentValue {
       text-align: center;
-      font-size: x-large;
       font-weight: 600;
     }
 
@@ -276,15 +285,14 @@ export class WidgetGauge extends LitElement {
 
     .scale-value {
       text-align: center;
-      font-size: large;
-      font-weight: 400;
+      font-weight: 100;
       width: 100px;
     }
 
     .label {
       text-align: center;
       position: absolute;
-      top: 10px;
+      width: 100%;
     }
 
   `;
@@ -299,16 +307,16 @@ export class WidgetGauge extends LitElement {
         <div class="gauge-container">
           ${repeat(this.dataSets, ds => ds.label, ds => html`
               <div class="single-gauge">
-                <div class="label">${ds.label}</div>
                 <div class="spacer"></div>
                 <div class="sizer">
                   <canvas name="${ds.label}"></canvas>
                 </div>
+                <div class="label">${ds.label}</div>
                 <div class="spacer"></div>
                 <div class="aligner">
                   <div class="values">
                     <div class="scale-value">${ds.sections[0]}</div>
-                    <div id="currentValue">${ds.needleValue.toFixed(0)}</div>
+                    <div id="currentValue">${ds.needleValue.toFixed(0)} ${ds.unit}</div>
                     <div class="scale-value">${ds.sections[ds.sections.length-1]}</div>
                   </div>
                 </div>
