@@ -14,7 +14,7 @@
       "#F1C27B",
       "#FF9B9B"
     ],
-    "averageLatest": 2,
+    "averageLatest": 1,
     "data": [{
       "value": 90,
       "pivot": "Frankfurt"
@@ -25,7 +25,7 @@
       "value": 70,
       "pivot": "Berlin"
     },{
-      "value": 60,
+      "value": 200,
       "pivot": "Frankfurt"
     }]
   },{
@@ -33,7 +33,7 @@
     "order": 2,
     "unit": "Pa",
     "needleColor": "black",
-    "sections": [50, 20, 80, 90, 200],
+    "sections": [50, 70, 80, 90, 200],
     "backgroundColors": [
       "#AAC8A7",
       "#F1C27B",

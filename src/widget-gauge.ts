@@ -99,6 +99,7 @@ export class WidgetGauge extends LitElement {
     this.dataSets.forEach(ds => {
       ds.data = ds.data.splice(-ds.averageLatest ?? -1)
       ds.needleValue = ds.data.map(d => d.value).reduce(( p, c ) => p + c, 0) / ds.data.length ?? ds.sections[0]
+
       ds.range = ds.sections[ds.sections.length -1] - ds.sections[0]
       ds.ranges = ds.sections.map((v, i, a) => v - (a?.[i-1] ?? 0)).slice(1)
     })
@@ -126,8 +127,11 @@ export class WidgetGauge extends LitElement {
   drawNeedle(chart: Chart) {
       const ds: Dataseries | undefined = this.dataSets.find(ds => chart.data.datasets[0].label === ds.label)
       if (!ds) return
+      let nv
+      nv = Math.max(ds.sections[0], ds.needleValue)
+      nv = Math.min(ds.sections[ds.sections.length-1], ds.needleValue)
 
-      const angle = Math.PI + (ds.needleValue - ds.sections[0]) / ds.range * Math.PI
+      const angle = Math.PI + (nv - ds.sections[0]) / ds.range * Math.PI
       const {ctx} = chart;
       const cw = chart.canvas.offsetWidth;
       const ch = chart.canvas.offsetHeight;
@@ -151,6 +155,14 @@ export class WidgetGauge extends LitElement {
       ctx.fill();
   }
 
+  // needleColor(ds: Dataseries) {
+  //   let idx: number | undefined = ds.sections.findIndex(s => s > ds.needleValue)
+  //   if (idx === -1) idx = ds.sections.length -1
+  //   // idx = Math.min(idx, ds.sections.length)
+  //   console.log(ds.label, idx -1, ds.backgroundColors[idx -1??0])
+  //   return ds.backgroundColors[idx -1 ?? ds.sections.length -1]
+  // }
+
   createChart() {
     this.dataSets.forEach(ds => {
       const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement;
@@ -165,8 +177,17 @@ export class WidgetGauge extends LitElement {
             datasets: [{
               label: ds.label,
               data: ds.ranges,
+              borderWidth: 0,
               backgroundColor: ds.backgroundColors
-            }]
+            },
+            // {
+            //   data: [1],
+            //   backgroundColor: ['white']
+            // },{
+            //   data: [1],
+            //   backgroundColor: [this.needleColor(ds)]
+            // }
+          ]
           },
           options: {
             responsive: true,
@@ -177,7 +198,7 @@ export class WidgetGauge extends LitElement {
               }
             },
             rotation: -90,
-            cutout: '30%',
+            cutout: '38%',
             circumference: 180,
             animation: {
               duration: 200,
