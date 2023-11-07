@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8">
+  <title>Gauge</title>
   <style>
     html, body {
       margin: 0;
@@ -20,20 +21,27 @@
 
 <body>
   <div id="demo"></div>
+  <script src="https://storage.googleapis.com/reswarm-images/ObjectRandomizer.js"></script>
 
   <script type="module">
     import { html, render } from 'lit';
     import '../dist/src/widget-gauge.js';
     import data from '../src/default-data.json' assert { type: 'json' };
+    
+    const keyPathsToRandomize = ['dataseries.0.data.4.value', 'settings.title'];
+    setInterval(() => {
+      const randomizedObj = randomizeObjectValues(data, keyPathsToRandomize);
 
-    render(
-      html`
-        <widget-gauge .inputData=${data}>
-          some light-dom
-        </widget-gauge>
-      `,
-      document.querySelector('#demo')
-    );
+      // console.log('random', randomizedObj.dataseries[0].data[0]);
+      render(
+        html`
+          <widget-gauge .inputData=${randomizedObj}>
+            some light-dom
+          </widget-gauge>
+        `,
+        document.querySelector('#demo')
+      );
+    }, 1000)
   </script>
 </body>
 
