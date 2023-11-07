@@ -21,6 +21,9 @@ export class WidgetGauge extends LitElement {
   @state()
   private canvasList: any = {}
 
+  @state()
+  private textActive: boolean = false
+
 
   @state()
   private numberLabels?: NodeListOf<Element>
@@ -36,6 +39,7 @@ export class WidgetGauge extends LitElement {
   constructor() {
     super()
     this.resizeObserver = new ResizeObserver((ev: ResizeObserverEntry[]) => {
+
       const width: number = ev[0].contentRect.width
       const height: number = ev[0].contentRect.height
       const spacerHeight = width * 0.08
@@ -203,7 +207,10 @@ export class WidgetGauge extends LitElement {
             animation: {
               duration: 200,
               animateRotate: false,
-              animateScale: true
+              animateScale: true,
+              onComplete: ({initial}) => {
+                if (initial) this.textActive = true
+              }
             },
             plugins: {
               tooltip: {
@@ -235,6 +242,8 @@ export class WidgetGauge extends LitElement {
       margin: auto;
     }
 
+    .paging:not([active]) { display: none !important; }
+
     .wrapper {
       display: flex;
       flex-direction: column;
@@ -246,6 +255,10 @@ export class WidgetGauge extends LitElement {
       flex: 1;
       overflow: hidden;
       position: relative;
+    }
+
+    .columnLayout {
+      flex-direction: column;
     }
 
     .sizer {
@@ -325,17 +338,17 @@ export class WidgetGauge extends LitElement {
           <h3>${this.gaugeTitle}</h3>
           <p>${this.gaugeDescription}</p>
         </header>
-        <div class="gauge-container">
+        <div class="gauge-container ${this?.inputData?.settings.columnLayout ? 'columnLayout': ''}">
           ${repeat(this.dataSets, ds => ds.label, ds => html`
               <div class="single-gauge">
                 <div class="spacer"></div>
                 <div class="sizer">
                   <canvas name="${ds.label}"></canvas>
                 </div>
-                <div class="label">${ds.label}</div>
+                <div class="label paging" ?active=${this.textActive}>${ds.label}</div>
                 <div class="spacer"></div>
                 <div class="aligner">
-                  <div class="values">
+                  <div class="values paging" ?active=${this.textActive}>
                     <div class="scale-value">${ds.sections[0]}</div>
                     <div id="currentValue">${ds.needleValue.toFixed(0)} ${ds.unit}</div>
                     <div class="scale-value">${ds.sections[ds.sections.length-1]}</div>

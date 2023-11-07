@@ -13,6 +13,10 @@
                 "subTitle": {
                     "Title": "Subtitle",
                     "type": "string"
+                },
+                "columnLayout": {
+                    "Title": "Vertical Layout",
+                    "type": "boolean"
                 }
             }
         },

@@ -3,6 +3,7 @@ import type { Chart } from 'chart.js/auto';
 export interface Settings {
     title: string
     subTitle: string
+    columnLayout: boolean
   }
 
 export interface Data {

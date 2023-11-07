@@ -1,7 +1,8 @@
 {
   "settings": {
     "title": "Gauge-chart",
-    "subTitle": "This shows a gauge for each dataseries"
+    "subTitle": "This shows a gauge for each dataseries",
+    "columnLayout": false
   },
   "dataseries": [{
     "label": "Demo Gauge 1",
@@ -27,6 +28,9 @@
     },{
       "value": 200,
       "pivot": "Frankfurt"
+    },{
+      "value": 200,
+      "pivot": "München"
     }]
   },{
     "label": "Demo Gauge 2",
