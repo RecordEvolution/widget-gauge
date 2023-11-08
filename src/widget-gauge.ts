@@ -10,12 +10,6 @@ export class WidgetGauge extends LitElement {
   inputData?: InputData = undefined
 
   @state()
-  private gaugeTitle: string = 'Gauge-chart';
-
-  @state()
-  private gaugeDescription: string = 'This is a Gauge-chart from the RE-Dashboard';
-
-  @state()
   private dataSets: Dataseries[] = []
 
   @state()
@@ -73,8 +67,6 @@ export class WidgetGauge extends LitElement {
   async applyInputData() {
 
     if(!this?.inputData) return
-    this.gaugeTitle = this.inputData.settings.title ?? this.gaugeTitle
-    this.gaugeDescription = this.inputData.settings.subTitle ?? this.gaugeDescription
     this.dataSets = []
     this.inputData.dataseries.forEach(ds => {
 
@@ -335,8 +327,8 @@ export class WidgetGauge extends LitElement {
     return html`
       <div class="wrapper">
         <header>
-          <h3>${this.gaugeTitle}</h3>
-          <p>${this.gaugeDescription}</p>
+          <h3>${this.inputData?.settings.title}</h3>
+          <p>${this.inputData?.settings.subTitle}</p>
         </header>
         <div class="gauge-container ${this?.inputData?.settings.columnLayout ? 'columnLayout': ''}">
           ${repeat(this.dataSets, ds => ds.label, ds => html`
