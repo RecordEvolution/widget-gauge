@@ -287,6 +287,9 @@ export class WidgetGauge extends LitElement {
       max-width: 300px;
       font-size: 14px;
       line-height: 17px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     #currentValue {
       text-align: center;
@@ -327,8 +330,8 @@ export class WidgetGauge extends LitElement {
     return html`
       <div class="wrapper">
         <header>
-          <h3>${this.inputData?.settings.title}</h3>
-          <p>${this.inputData?.settings.subTitle}</p>
+          <h3 class="paging" ?active=${this.inputData?.settings?.title}>${this.inputData?.settings?.title}</h3>
+          <p class="paging" ?active=${this.inputData?.settings?.subTitle}>${this.inputData?.settings?.subTitle}</p>
         </header>
         <div class="gauge-container ${this?.inputData?.settings.columnLayout ? 'columnLayout': ''}">
           ${repeat(this.dataSets, ds => ds.label, ds => html`
