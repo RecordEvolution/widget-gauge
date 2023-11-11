@@ -122,7 +122,7 @@ export class WidgetGauge extends LitElement {
 
   drawNeedle(chart: Chart) {
       const ds: Dataseries | undefined = this.dataSets.find(ds => chart.data.datasets[0].label === ds.label)
-      if (!ds) return
+      if (!ds || isNaN(ds.needleValue)) return
       let nv
       nv = Math.max(ds.sections[0], ds.needleValue)
       nv = Math.min(ds.sections[ds.sections.length-1], ds.needleValue)
@@ -342,7 +342,7 @@ export class WidgetGauge extends LitElement {
                 <div class="aligner">
                   <div class="values paging" ?active=${this.textActive}>
                     <div class="scale-value">${ds.sections[0]}</div>
-                    <div id="currentValue">${ds.needleValue.toFixed(0)} ${ds.unit}</div>
+                    <div id="currentValue">${ isNaN(ds.needleValue) ? '' : ds.needleValue.toFixed(0)} ${ds.unit}</div>
                     <div class="scale-value">${ds.sections[ds.sections.length-1]}</div>
                   </div>
                 </div>
