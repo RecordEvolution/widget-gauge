@@ -333,7 +333,7 @@ export class WidgetGauge extends LitElement {
           <h3 class="paging" ?active=${this.inputData?.settings?.title}>${this.inputData?.settings?.title}</h3>
           <p class="paging" ?active=${this.inputData?.settings?.subTitle}>${this.inputData?.settings?.subTitle}</p>
         </header>
-        <div class="gauge-container ${this?.inputData?.settings.columnLayout ? 'columnLayout': ''}">
+        <div class="gauge-container ${this?.inputData?.settings?.columnLayout ? 'columnLayout': ''}">
           ${repeat(this.dataSets, ds => ds.label, ds => html`
               <div class="single-gauge">
                 <div class="spacer"></div>
