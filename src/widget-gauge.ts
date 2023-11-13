@@ -56,12 +56,13 @@ export class WidgetGauge extends LitElement {
     })
   }
 
-  updated(changedProperties: Map<string, any>) {
+  update(changedProperties: Map<string, any>) {
     changedProperties.forEach((oldValue, propName) => {
       if (propName === 'inputData') {
         this.applyInputData()
       }
     })
+    super.update(changedProperties)
   }
 
   async applyInputData() {
@@ -122,7 +123,7 @@ export class WidgetGauge extends LitElement {
 
   drawNeedle(chart: Chart) {
       const ds: Dataseries | undefined = this.dataSets.find(ds => chart.data.datasets[0].label === ds.label)
-      if (!ds || isNaN(ds.needleValue)) return
+      if (!ds || isNaN(ds.needleValue)) return
       let nv
       nv = Math.max(ds.sections[0], ds.needleValue)
       nv = Math.min(ds.sections[ds.sections.length-1], ds.needleValue)
