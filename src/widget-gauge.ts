@@ -69,7 +69,7 @@ export class WidgetGauge extends LitElement {
 
     if(!this?.inputData) return
     this.dataSets = []
-    this.inputData.dataseries.forEach(ds => {
+    this.inputData.dataseries.sort((a, b) => a.order - b.order).forEach(ds => {
 
       // pivot data
       const distincts = [...new Set(ds.data.map((d: Data) => d.pivot))]
