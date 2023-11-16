@@ -1,7 +1,6 @@
 {
   "settings": {
-    "title": "Gauge-chart",
-    "subTitle": "This shows a gauge for each dataseries",
+
     "columnLayout": false
   },
   "dataseries": [{
