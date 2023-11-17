@@ -54,7 +54,7 @@
                         "description": "Background color for each section. This Array is one shorter than the number of sections.",
                         "type": "array",
                         "items": {
-                            "type": "string"
+                            "type": "color"
                         }
                     },
                     "averageLatest": {
