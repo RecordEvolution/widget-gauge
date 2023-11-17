@@ -294,6 +294,7 @@ export class WidgetGauge extends LitElement {
     }
     #currentValue {
       text-align: center;
+      white-space: nowrap;
       font-weight: 600;
     }
 
