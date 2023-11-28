@@ -227,7 +227,7 @@ export class WidgetGauge extends LitElement {
   static styles = css`
     :host {
       display: block;
-      color: var(--widget-gauge-text-color, #000);
+      // color: var(--re-text-color, #000);
       font-family: sans-serif;
       padding: 16px;
       box-sizing: border-box;
