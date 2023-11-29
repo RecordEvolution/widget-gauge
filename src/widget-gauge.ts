@@ -30,30 +30,14 @@ export class WidgetGauge extends LitElement {
 
 
   resizeObserver: ResizeObserver
+  boxes?: HTMLDivElement[]
+  origWidth: number = 0
+  origHeight: number = 0
   constructor() {
     super()
-    this.resizeObserver = new ResizeObserver((ev: ResizeObserverEntry[]) => {
+    this.resizeObserver = new ResizeObserver(this.adjustSizes.bind(this))
+    this.resizeObserver.observe(this)
 
-      const width: number = ev[0].contentRect.width
-      const height: number = ev[0].contentRect.height
-      const spacerHeight = width * 0.08
-
-      this.numberLabels?.forEach(n => {
-        n.setAttribute("style", `font-size: ${width*0.06}px;width: ${width}px;`)
-      })
-
-      this.alignerLabels?.forEach(n => {
-        n.setAttribute("style", `top: ${height+ spacerHeight}px`)
-      })
-
-      this.titleLabels?.forEach(n => {
-          n.setAttribute("style", `font-size: ${width*0.06}px; top: ${spacerHeight*0.2}px;`)
-        })
-      
-      this.spacers?.forEach(n => {
-        n.setAttribute("style", `height: ${spacerHeight}px;`)
-      })
-    })
   }
 
   update(changedProperties: Map<string, any>) {
@@ -62,7 +46,86 @@ export class WidgetGauge extends LitElement {
         this.applyInputData()
       }
     })
+
+    this.sizingSetup()
+
     super.update(changedProperties)
+  }
+
+  sizingSetup() {
+    if (this.origWidth !== 0 && this.origHeight !== 0) return
+
+    this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.single-gauge') as NodeListOf<HTMLDivElement>)
+
+    this.numberLabels = this?.shadowRoot?.querySelectorAll('.values')
+    this.alignerLabels = this?.shadowRoot?.querySelectorAll('.aligner')
+    this.titleLabels = this?.shadowRoot?.querySelectorAll('.label')
+    this.spacers = this?.shadowRoot?.querySelectorAll('.spacer')
+
+    this.origWidth = this.boxes?.map(b => b.getBoundingClientRect().width).reduce((p, c) => c > p ? c : p, 0 ) ?? 0
+    this.origHeight = this.boxes?.map(b => b.getBoundingClientRect().height).reduce((p, c) => c > p ? c : p, 0 ) ?? 0
+
+    if (this.origWidth > 0) this.origWidth += 16
+    if (this.origHeight > 0) this.origHeight += 16
+    console.log('OrigWidth', this.origWidth, this.origHeight)
+
+  }
+
+  adjustSizes() {
+    console.log('adjustSizes')
+    if (!this.origHeight) return
+    const userWidth = this.getBoundingClientRect().width
+    const userHeight = this.getBoundingClientRect().height
+    const count = this.dataSets.length
+
+    const width = this.origWidth
+    const height = this.origHeight
+
+    const fits = []
+    for (let c = 1; c <= count; c++) {
+      const r = Math.ceil(count/c)
+      const uwgap = (userWidth - 12 * (c-1))
+      const uhgap = (userHeight - 12 * (r-1))
+      const m = uwgap / width / c
+      const size = m * m * width * height * count
+      if (r * m * height < uhgap) fits.push({c, m, size, width, height, userWidth, userHeight})
+    }
+
+    for (let r = 1; r <= count; r++) {
+      const c = Math.ceil(count/r)
+      const uwgap = (userWidth - 12 * (c-1))
+      const uhgap = (userHeight - 12 * (r-1))
+      const m = uhgap / height / r
+      const size = m * m * width * height * count
+      if (c * m * width < uwgap) fits.push({r, m, size, width, height, userWidth, userHeight})
+    }
+
+    const maxSize = fits.reduce((p, c) => c.size < p ? p : c.size, 0)
+    const fit = fits.find(f => f.size === maxSize)
+    const modifier = (fit?.m ?? 0)
+
+    console.log('FITS', fits, 'modifier', modifier, 'cols',fit?.c, 'rows', fit?.r, 'new size', fit?.size.toFixed(0), 'total space', (userWidth* userHeight).toFixed(0))
+
+    this.boxes?.forEach(box => box.setAttribute("style", `width:${modifier*width}px; height:${modifier*height}px`))
+
+    this.numberLabels?.forEach(n => {
+      n.setAttribute("style", `font-size: ${16*modifier}px; width: ${width * modifier*1.5}px;`)
+    })
+
+    this.alignerLabels?.forEach(n => {
+      n.setAttribute("style", `bottom: ${16 * modifier}px`)
+    })
+
+    this.titleLabels?.forEach(n => {
+        n.setAttribute("style", `font-size: ${16*modifier}px; top: ${0*modifier}px;`)
+      })
+    
+    this.spacers?.forEach(n => {
+      n.setAttribute("style", `height: ${26*modifier}px;`)
+    })
+
+    this.textActive = true
+    
   }
 
   async applyInputData() {
@@ -161,6 +224,8 @@ export class WidgetGauge extends LitElement {
   // }
 
   createChart() {
+    console.log('create chart')
+    if (!this.origWidth) return
     this.dataSets.forEach(ds => {
       const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement;
       this.resizeObserver.observe(canvas)
@@ -218,10 +283,7 @@ export class WidgetGauge extends LitElement {
         }
       ) as Chart
     })
-    this.numberLabels = this?.shadowRoot?.querySelectorAll('.values')
-    this.alignerLabels = this?.shadowRoot?.querySelectorAll('.aligner')
-    this.titleLabels = this?.shadowRoot?.querySelectorAll('.label')
-    this.spacers = this?.shadowRoot?.querySelectorAll('.spacer')
+
   }
 
   static styles = css`
@@ -229,7 +291,6 @@ export class WidgetGauge extends LitElement {
       display: block;
       color: var(--re-text-color, #000);
       font-family: sans-serif;
-      padding: 16px;
       box-sizing: border-box;
       position: relative;
       margin: auto;
@@ -245,9 +306,10 @@ export class WidgetGauge extends LitElement {
     }
     .gauge-container {
       display: flex;
-      flex: 1;
+      flex-wrap: wrap;
       overflow: hidden;
       position: relative;
+      gap: 12px;
     }
 
     .columnLayout {
@@ -265,7 +327,6 @@ export class WidgetGauge extends LitElement {
     .single-gauge {
       display: flex;
       flex-direction: column;
-      flex: 1;
       overflow: hidden;
       position: relative;
       align-items: stretch;
@@ -304,7 +365,7 @@ export class WidgetGauge extends LitElement {
 
     .values {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
     }
 
     .aligner {
@@ -335,7 +396,7 @@ export class WidgetGauge extends LitElement {
           <h3 class="paging" ?active=${this.inputData?.settings?.title}>${this.inputData?.settings?.title}</h3>
           <p class="paging" ?active=${this.inputData?.settings?.subTitle}>${this.inputData?.settings?.subTitle}</p>
         </header>
-        <div class="gauge-container ${this?.inputData?.settings?.columnLayout ? 'columnLayout': ''}">
+        <div class="gauge-container">
           ${repeat(this.dataSets, ds => ds.label, ds => html`
               <div class="single-gauge">
                 <div class="spacer"></div>
