@@ -224,11 +224,9 @@ export class WidgetGauge extends LitElement {
   // }
 
   createChart() {
-    console.log('create chart')
     if (!this.origWidth) return
     this.dataSets.forEach(ds => {
       const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement;
-      this.resizeObserver.observe(canvas)
 
       if (!canvas) return
       this.canvasList[ds.label] = new Chart(
