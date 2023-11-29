@@ -52,6 +52,10 @@ export class WidgetGauge extends LitElement {
     super.update(changedProperties)
   }
 
+  protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+      this.sizingSetup()
+  }
+
   sizingSetup() {
     if (this.origWidth !== 0 && this.origHeight !== 0) return
 
@@ -73,7 +77,7 @@ export class WidgetGauge extends LitElement {
 
   adjustSizes() {
     console.log('adjustSizes')
-    if (!this.origHeight) return
+    // if (!this.origHeight) return
     const userWidth = this.getBoundingClientRect().width
     const userHeight = this.getBoundingClientRect().height
     const count = this.dataSets.length

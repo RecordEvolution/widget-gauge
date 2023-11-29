@@ -29,7 +29,7 @@
     import data from '../src/default-data.json' assert { type: 'json' };
     
     const keyPathsToRandomize = ['dataseries.0.data.4.value', 'settings.title'];
-    setInterval(() => {
+    const inter = setInterval(() => {
       const randomizedObj = randomizeObjectValues(data, keyPathsToRandomize);
 
       // console.log('random', randomizedObj.dataseries[0].data[0]);
@@ -41,6 +41,7 @@
         `,
         document.querySelector('#demo')
       );
+      // clearInterval(inter)
     }, 1000)
   </script>
 </body>
