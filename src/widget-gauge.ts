@@ -71,12 +71,12 @@ export class WidgetGauge extends LitElement {
 
     if (this.origWidth > 0) this.origWidth += 16
     if (this.origHeight > 0) this.origHeight += 16
-    console.log('OrigWidth', this.origWidth, this.origHeight)
+    // console.log('OrigWidth', this.origWidth, this.origHeight)
 
   }
 
   adjustSizes() {
-    console.log('adjustSizes')
+    // console.log('adjustSizes')
     // if (!this.origHeight) return
     const userWidth = this.getBoundingClientRect().width
     const userHeight = this.getBoundingClientRect().height
@@ -108,7 +108,7 @@ export class WidgetGauge extends LitElement {
     const fit = fits.find(f => f.size === maxSize)
     const modifier = (fit?.m ?? 0)
 
-    console.log('FITS', fits, 'modifier', modifier, 'cols',fit?.c, 'rows', fit?.r, 'new size', fit?.size.toFixed(0), 'total space', (userWidth* userHeight).toFixed(0))
+    // console.log('FITS', fits, 'modifier', modifier, 'cols',fit?.c, 'rows', fit?.r, 'new size', fit?.size.toFixed(0), 'total space', (userWidth* userHeight).toFixed(0))
 
     this.boxes?.forEach(box => box.setAttribute("style", `width:${modifier*width}px; height:${modifier*height}px`))
 
