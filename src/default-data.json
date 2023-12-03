@@ -1,7 +1,6 @@
 {
   "settings": {
 
-    "columnLayout": false
   },
   "dataseries": [{
     "label": "Demo Gauge 1",

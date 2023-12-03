@@ -174,8 +174,9 @@ export class WidgetGauge extends LitElement {
   adjustSizes() {
     // console.log('adjustSizes')
     // if (!this.origHeight) return
-    const userWidth = this.getBoundingClientRect().width
-    const userHeight = this.getBoundingClientRect().height
+    const container = this.shadowRoot?.querySelector('.gauge-container') as HTMLDivElement
+    const userWidth = container.getBoundingClientRect().width
+    const userHeight = container.getBoundingClientRect().height
     const count = this.dataSets.length
 
     const width = this.origWidth
@@ -354,9 +355,12 @@ export class WidgetGauge extends LitElement {
       flex-direction: column;
       height: 100%;
       width: 100%;
+      padding: 16px;
+      box-sizing: border-box;
     }
     .gauge-container {
       display: flex;
+      flex: 1;
       flex-wrap: wrap;
       overflow: hidden;
       position: relative;
