@@ -255,7 +255,7 @@ export class WidgetGauge extends LitElement {
 
     this.requestUpdate(); await this.updateComplete
 
-    console.log('Gauge Datasets', this.dataSets)
+    // console.log('Gauge Datasets', this.dataSets)
 
     // create charts
     if (!Object.entries(this.canvasList).length) {
@@ -268,7 +268,6 @@ export class WidgetGauge extends LitElement {
 
   applyData() {
     const modifier = this.modifier
-    console.log('modi', modifier)
     for (const ds of this.dataSets) {
 
       // const option = this.canvasList[ds.label].getOption()
@@ -295,13 +294,13 @@ export class WidgetGauge extends LitElement {
       // ga.pointer.itemStyle.color = ds.needleColor
 
       // Axis
-      const colorSections = ds.backgroundColors.map((b, i) => [(ds.sections[i+1] - ga.min) / ds.range, b])
-      ga2.axisLine.lineStyle.color = colorSections
-      ga2.axisLine.lineStyle.width = 8 * modifier
       ga2.min = Math.min(...ds.sections)
       ga2.max = Math.max(...ds.sections)
       ga.min = ga2.min
       ga.max = ga2.max
+      const colorSections = ds.backgroundColors.map((b, i) => [(ds.sections[i+1] - ga.min) / ds.range, b])
+      ga2.axisLine.lineStyle.width = 8 * modifier
+      ga2.axisLine.lineStyle.color = colorSections
       ga2.axisLabel.fontSize = 20 * modifier
       ga2.axisLabel.distance = -44 * modifier
       ga2.splitLine.length = 16 * modifier
@@ -309,6 +308,7 @@ export class WidgetGauge extends LitElement {
 
       // Progress
       let progressColor: string = ds.backgroundColors[ds.backgroundColors.length -1]
+      if (ds.unit === 'Pa') console.log('sections', ds.sections, ds.backgroundColors, colorSections, ds.range)
       for (const [i, s] of ds.sections.entries()) {
         if (s > ds.needleValue) {
           progressColor = ds.backgroundColors[i - 1] ?? ds.backgroundColors[0]
