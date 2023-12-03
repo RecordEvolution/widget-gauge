@@ -297,8 +297,8 @@ export class WidgetGauge extends LitElement {
     ga.progress.itemStyle.color = needleColor
 
     // Apply
-    this.canvasList[ds.label].setOption(option)
     this.canvasList[ds.label].resize()
+    this.canvasList[ds.label].setOption(option)
   }
 
 
