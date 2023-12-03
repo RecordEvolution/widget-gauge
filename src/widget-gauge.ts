@@ -1,8 +1,11 @@
 import { html, css, LitElement, PropertyValueMap } from 'lit';
 import { repeat } from 'lit/directives/repeat.js'
 import { property, state } from 'lit/decorators.js';
-import { Chart } from 'chart.js/auto';
+// import * as echarts from 'echarts';
 import { InputData, Data, Dataseries } from './types.js'
+import type { EChartsOption, GaugeSeriesOption } from 'echarts';
+
+// echarts.use([GaugeChart, CanvasRenderer]);
 
 export class WidgetGauge extends LitElement {
   
@@ -33,17 +36,116 @@ export class WidgetGauge extends LitElement {
   boxes?: HTMLDivElement[]
   origWidth: number = 0
   origHeight: number = 0
+  template: EChartsOption
   constructor() {
     super()
     this.resizeObserver = new ResizeObserver(this.adjustSizes.bind(this))
     this.resizeObserver.observe(this)
+
+    this.template = {
+      series: [
+        {
+          type: 'gauge',
+          startAngle: 180,
+          endAngle: 0,
+          min: 33,
+          max: 99,
+          progress: {
+            show: true,
+            width: 50,
+            roundCap: false,
+            itemStyle: {
+              color: 'auto'
+            }
+          },
+          axisLine: {
+            show: false,
+            lineStyle: {
+              width: 10,
+              color: [
+                [0.3, '#67e0e3'],
+                [0.7, '#37a2da'],
+                [1, '#fd666d']
+              ]
+            }
+          },
+          axisTick: {
+            show: false
+          },
+          splitLine: {
+            length: 15,
+            distance: -25,
+            lineStyle: {
+              width: 2,
+              color: 'auto',
+            }
+          },
+          axisLabel: {
+            distance: -24,
+            color: '#999',
+            fontSize: 12,
+            formatter: `{value}`
+          },
+          title: {
+            show: false
+          },
+          anchor: {
+            show: false,
+            showAbove: true,
+            size: 22,
+            itemStyle: {
+              borderWidth: 0,
+            }
+          },
+          pointer: {
+            show: false,
+            itemStyle: {
+              color: 'auto'
+            }
+          },
+          detail: {
+            valueAnimation: false,
+            formatter: '{value} km/h',
+            fontSize: 25,
+            offsetCenter: [0, 0],
+            color: 'inherit'
+          },
+          data: [
+            {
+              value: 70
+            }
+          ]
+        } as GaugeSeriesOption,
+        {
+          type: 'gauge',
+          startAngle: 180,
+          endAngle: 0,
+          min: 33,
+          max: 99,
+          radius: '80%',
+          axisLine: {
+            lineStyle: {
+              width: 10,
+              color: [
+                [0.3, '#67e0e3'],
+                [0.7, '#37a2da'],
+                [1, '#fd666d']
+              ]
+            }
+          },
+          axisTick: { show: false},
+          axisLabel: { show: false},
+          splitLine: { show: false}
+        } as GaugeSeriesOption,
+      ]
+    };
 
   }
 
   update(changedProperties: Map<string, any>) {
     changedProperties.forEach((oldValue, propName) => {
       if (propName === 'inputData') {
-        this.applyInputData()
+        this.transformData()
       }
     })
 
@@ -59,12 +161,7 @@ export class WidgetGauge extends LitElement {
   sizingSetup() {
     if (this.origWidth !== 0 && this.origHeight !== 0) return
 
-    this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.single-gauge') as NodeListOf<HTMLDivElement>)
-
-    this.numberLabels = this?.shadowRoot?.querySelectorAll('.values')
-    this.alignerLabels = this?.shadowRoot?.querySelectorAll('.aligner')
-    this.titleLabels = this?.shadowRoot?.querySelectorAll('.label')
-    this.spacers = this?.shadowRoot?.querySelectorAll('.spacer')
+    this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
 
     this.origWidth = this.boxes?.map(b => b.getBoundingClientRect().width).reduce((p, c) => c > p ? c : p, 0 ) ?? 0
     this.origHeight = this.boxes?.map(b => b.getBoundingClientRect().height).reduce((p, c) => c > p ? c : p, 0 ) ?? 0
@@ -112,28 +209,11 @@ export class WidgetGauge extends LitElement {
 
     this.boxes?.forEach(box => box.setAttribute("style", `width:${modifier*width}px; height:${modifier*height}px`))
 
-    this.numberLabels?.forEach(n => {
-      n.setAttribute("style", `font-size: ${16*modifier}px; width: ${width * modifier*1.5}px;`)
-    })
-
-    this.alignerLabels?.forEach(n => {
-      n.setAttribute("style", `bottom: ${16 * modifier}px`)
-    })
-
-    this.titleLabels?.forEach(n => {
-        n.setAttribute("style", `font-size: ${16*modifier}px; top: ${0*modifier}px;`)
-      })
-    
-    this.spacers?.forEach(n => {
-      n.setAttribute("style", `height: ${26*modifier}px;`)
-    })
-
     this.textActive = true
     
   }
 
-  async applyInputData() {
-
+  async transformData() {
     if(!this?.inputData) return
     this.dataSets = []
     this.inputData.dataseries.sort((a, b) => a.order - b.order).forEach(ds => {
@@ -170,7 +250,7 @@ export class WidgetGauge extends LitElement {
 
     this.requestUpdate(); await this.updateComplete
 
-    // console.log('Gauge Datasets', this.dataSets)
+    console.log('Gauge Datasets', this.dataSets)
 
     // create charts
     if (!Object.entries(this.canvasList).length) {
@@ -180,110 +260,57 @@ export class WidgetGauge extends LitElement {
     // update chart info
     this.dataSets.forEach(ds => {
       if (this.canvasList[ds.label]) {
-        this.canvasList[ds.label].data.datasets[0].data = ds.ranges
-        this.canvasList[ds.label].data.datasets[0].backgroundColor = ds.backgroundColors
-
-        this.canvasList[ds.label].update('none')
+        this.applyData(ds)
+        // this.canvasList[ds.label].resize()
       }
     })
   }
 
-  drawNeedle(chart: Chart) {
-      const ds: Dataseries | undefined = this.dataSets.find(ds => chart.data.datasets[0].label === ds.label)
-      if (!ds || isNaN(ds.needleValue)) return
-      let nv
-      nv = Math.max(ds.sections[0], ds.needleValue)
-      nv = Math.min(ds.sections[ds.sections.length-1], ds.needleValue)
+  applyData(ds: Dataseries) {
+    const option = this.canvasList[ds.label].getOption()
+    
+    const ga = option.series[0]
 
-      const angle = Math.PI + (nv - ds.sections[0]) / ds.range * Math.PI
-      const {ctx} = chart;
-      const cw = chart.canvas.offsetWidth;
-      const ch = chart.canvas.offsetHeight;
-      // const cw = this.offsetWidth;
-      // const ch = this.offsetHeight;
-      const cx = cw / 2;
-      const cy = ch - 6;
+    let needleColor: string = ds.backgroundColors[ds.backgroundColors.length -1]
+    for (const [i, s] of ds.sections.entries()) {
+      if (s > ds.needleValue) {
+        needleColor = ds.backgroundColors[i - 1] ?? ds.backgroundColors[0]
+        break
+      }
+    }
 
-      ctx.translate(cx, cy);
-      ctx.rotate(angle);
-      ctx.beginPath();
-      ctx.moveTo(0, -3);
-      ctx.lineTo(ch - 20, 0);
-      ctx.lineTo(0, 3);
-      ctx.fillStyle = ds.needleColor;
-      ctx.fill();
-      ctx.rotate(-angle);
-      ctx.translate(-cx, -cy);
-      ctx.beginPath();
-      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-      ctx.fill();
+    // Needle
+    ga.data[0].value = ds.needleValue.toFixed()
+    ga.detail.formatter = '{value} ' + ds.unit
+    ga.detail.color = ds.needleColor
+    ga.anchor.itemStyle.color = ds.needleColor
+    ga.pointer.itemStyle.color = ds.needleColor
+
+    // Axis
+    const colorSections = ds.backgroundColors.map((b, i) => [(ds.sections[i+1] - ga.min) / ds.range, b])
+    ga.axisLine.lineStyle.color = colorSections
+    option.series[1].axisLine.lineStyle.color = colorSections
+    ga.min = Math.min(...ds.sections)
+    ga.max = Math.max(...ds.sections)
+
+    // Progress
+    ga.progress.itemStyle.color = needleColor
+
+    // Apply
+    this.canvasList[ds.label].setOption(option)
+    this.canvasList[ds.label].resize()
   }
 
-  // needleColor(ds: Dataseries) {
-  //   let idx: number | undefined = ds.sections.findIndex(s => s > ds.needleValue)
-  //   if (idx === -1) idx = ds.sections.length -1
-  //   // idx = Math.min(idx, ds.sections.length)
-  //   console.log(ds.label, idx -1, ds.backgroundColors[idx -1??0])
-  //   return ds.backgroundColors[idx -1 ?? ds.sections.length -1]
-  // }
 
   createChart() {
-    if (!this.origWidth) return
     this.dataSets.forEach(ds => {
       const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement;
-
+      console.log('ds', ds.label, canvas)
       if (!canvas) return
-      this.canvasList[ds.label] = new Chart(
-        canvas,
-        {
-          type: 'doughnut',
-          data: {
-            datasets: [{
-              label: ds.label,
-              data: ds.ranges,
-              borderWidth: 0,
-              backgroundColor: ds.backgroundColors
-            },
-            // {
-            //   data: [1],
-            //   backgroundColor: ['white']
-            // },{
-            //   data: [1],
-            //   backgroundColor: [this.needleColor(ds)]
-            // }
-          ]
-          },
-          options: {
-            responsive: true,
-            aspectRatio: 2,
-            layout: {
-              padding: {
-                bottom: 3
-              }
-            },
-            rotation: -90,
-            cutout: '38%',
-            circumference: 180,
-            animation: {
-              duration: 200,
-              animateRotate: false,
-              animateScale: true,
-              onComplete: ({initial}) => {
-                if (initial) this.textActive = true
-              }
-            },
-            plugins: {
-              tooltip: {
-                enabled: false
-              }
-            }
-          },
-          plugins: [{
-            id: 'doughnut',
-            afterDraw: this.drawNeedle.bind(this)
-          }]
-        }
-      ) as Chart
+      // @ts-ignore
+      this.canvasList[ds.label] = echarts.init(canvas);
+      this.canvasList[ds.label].setOption(JSON.parse(JSON.stringify(this.template)))
+      
     })
 
   }
@@ -314,26 +341,6 @@ export class WidgetGauge extends LitElement {
       gap: 12px;
     }
 
-    .columnLayout {
-      flex-direction: column;
-    }
-
-    .sizer {
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      justify-content: center;
-    }
-
-    .single-gauge {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-      align-items: stretch;
-    }
-
     header {
       display: flex;
       flex-direction: column;
@@ -355,38 +362,10 @@ export class WidgetGauge extends LitElement {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    #currentValue {
-      text-align: center;
-      white-space: nowrap;
-      font-weight: 600;
-    }
 
-    .spacer {
-      height: 30px;
-    }
-
-    .values {
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .aligner {
-      position: absolute;
-      display: flex;
-      justify-content: center;
-      width: 100%;
-    }
-
-    .scale-value {
-      text-align: center;
-      font-weight: 100;
-      width: 100px;
-    }
-
-    .label {
-      text-align: center;
-      position: absolute;
-      width: 100%;
+    .chart {
+      aspect-ratio: 2 / 1;
+      width: 400px;
     }
 
   `;
@@ -400,21 +379,7 @@ export class WidgetGauge extends LitElement {
         </header>
         <div class="gauge-container">
           ${repeat(this.dataSets, ds => ds.label, ds => html`
-              <div class="single-gauge">
-                <div class="spacer"></div>
-                <div class="sizer">
-                  <canvas name="${ds.label}"></canvas>
-                </div>
-                <div class="label paging" ?active=${this.textActive}>${ds.label}</div>
-                <div class="spacer"></div>
-                <div class="aligner">
-                  <div class="values paging" ?active=${this.textActive}>
-                    <div class="scale-value">${ds.sections[0]}</div>
-                    <div id="currentValue">${ isNaN(ds.needleValue) ? '' : ds.needleValue.toFixed(0)} ${ds.unit}</div>
-                    <div class="scale-value">${ds.sections[ds.sections.length-1]}</div>
-                  </div>
-                </div>
-              </div>
+            <div name="${ds.label}" class="chart"></div>
           `)}
         </div>
       </div>
