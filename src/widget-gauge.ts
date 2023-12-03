@@ -58,8 +58,8 @@ export class WidgetGauge extends LitElement {
           endAngle: 0,
           min: 33,
           max: 99,
-          radius: '140%',
-          center: ['50%', '95%'],
+          radius: '120%',
+          center: ['50%', '90%'],
           progress: {
             show: true,
             clip: true,
@@ -90,11 +90,11 @@ export class WidgetGauge extends LitElement {
           detail: {
             valueAnimation: false,
             fontSize: 25,
-            offsetCenter: [0, '-5%'],
+            offsetCenter: [0, '-7%'],
             color: 'inherit'
           },
           title: {
-            offsetCenter: [0, '-40%'],
+            offsetCenter: [0, '-35%'],
             fontSize: 20
           },
           data: [
@@ -109,8 +109,8 @@ export class WidgetGauge extends LitElement {
           endAngle: 0,
           min: 33,
           max: 99,
-          radius: '145%',
-          center: ['50%', '95%'],
+          radius: '125%',
+          center: ['50%', '90%'],
           axisLine: {
             lineStyle: {
               width: 20,
@@ -282,11 +282,13 @@ export class WidgetGauge extends LitElement {
       // @ts-ignore
       option.title.text = ds.label
       // @ts-ignore
-      option.title.textStyle.fontSize = 16 * modifier
+      option.title.textStyle.fontSize = 22 * modifier
 
       // Needle
       ga.data[0].value = ds.needleValue.toFixed()
       ga.data[0].name = ds.unit
+      ga.title.fontSize = 20 * modifier
+      ga.title.color = ds.needleColor
       ga.detail.color = ds.needleColor
       ga.detail.fontSize = 40 * modifier
       // ga.anchor.itemStyle.color = ds.needleColor
@@ -300,8 +302,8 @@ export class WidgetGauge extends LitElement {
       ga2.max = Math.max(...ds.sections)
       ga.min = ga2.min
       ga.max = ga2.max
-      ga2.axisLabel.fontSize = 14 * modifier
-      ga2.axisLabel.distance = -35 * modifier
+      ga2.axisLabel.fontSize = 20 * modifier
+      ga2.axisLabel.distance = -44 * modifier
       ga2.splitLine.length = 16 * modifier
       ga2.splitLine.distance = -16 * modifier
 
