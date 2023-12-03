@@ -37,12 +37,20 @@ export class WidgetGauge extends LitElement {
   origWidth: number = 0
   origHeight: number = 0
   template: EChartsOption
+  modifier: number = 1
   constructor() {
     super()
     this.resizeObserver = new ResizeObserver(this.adjustSizes.bind(this))
     this.resizeObserver.observe(this)
 
     this.template = {
+      title: {
+        text: 'Waterfall',
+        left: 'center',
+        textStyle: {
+          fontSize: 10
+        }
+      },
       series: [
         {
           type: 'gauge',
@@ -50,45 +58,21 @@ export class WidgetGauge extends LitElement {
           endAngle: 0,
           min: 33,
           max: 99,
+          radius: '140%',
+          center: ['50%', '95%'],
           progress: {
             show: true,
+            clip: true,
             width: 50,
             roundCap: false,
             itemStyle: {
               color: 'auto'
             }
           },
-          axisLine: {
-            show: false,
-            lineStyle: {
-              width: 10,
-              color: [
-                [0.3, '#67e0e3'],
-                [0.7, '#37a2da'],
-                [1, '#fd666d']
-              ]
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          splitLine: {
-            length: 15,
-            distance: -25,
-            lineStyle: {
-              width: 2,
-              color: 'auto',
-            }
-          },
-          axisLabel: {
-            distance: -24,
-            color: '#999',
-            fontSize: 12,
-            formatter: `{value}`
-          },
-          title: {
-            show: false
-          },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          splitLine: {show: false },
+          axisLabel: {show: false },
           anchor: {
             show: false,
             showAbove: true,
@@ -105,14 +89,17 @@ export class WidgetGauge extends LitElement {
           },
           detail: {
             valueAnimation: false,
-            formatter: '{value} km/h',
             fontSize: 25,
-            offsetCenter: [0, 0],
+            offsetCenter: [0, '-5%'],
             color: 'inherit'
+          },
+          title: {
+            offsetCenter: [0, '-40%'],
+            fontSize: 20
           },
           data: [
             {
-              value: 70
+              value: 70,
             }
           ]
         } as GaugeSeriesOption,
@@ -122,10 +109,11 @@ export class WidgetGauge extends LitElement {
           endAngle: 0,
           min: 33,
           max: 99,
-          radius: '80%',
+          radius: '145%',
+          center: ['50%', '95%'],
           axisLine: {
             lineStyle: {
-              width: 10,
+              width: 20,
               color: [
                 [0.3, '#67e0e3'],
                 [0.7, '#37a2da'],
@@ -134,8 +122,19 @@ export class WidgetGauge extends LitElement {
             }
           },
           axisTick: { show: false},
-          axisLabel: { show: false},
-          splitLine: { show: false}
+          splitLine: {
+            length: 15,
+            distance: -25,
+            lineStyle: {
+              width: 2,
+              color: 'auto',
+            }
+          },
+          axisLabel: {
+            distance: -20,
+            color: '#999',
+            fontSize: 12,
+          },
         } as GaugeSeriesOption,
       ]
     };
@@ -209,8 +208,14 @@ export class WidgetGauge extends LitElement {
 
     this.boxes?.forEach(box => box.setAttribute("style", `width:${modifier*width}px; height:${modifier*height}px`))
 
+    this.modifier = modifier
+
     this.textActive = true
-    
+    for (const canvas in this.canvasList) {
+      this.canvasList[canvas].resize()
+    }
+    this.applyData()
+
   }
 
   async transformData() {
@@ -258,49 +263,64 @@ export class WidgetGauge extends LitElement {
     }
 
     // update chart info
-    this.dataSets.forEach(ds => {
-      if (this.canvasList[ds.label]) {
-        this.applyData(ds)
-        // this.canvasList[ds.label].resize()
-      }
-    })
+    this.applyData()
   }
 
-  applyData(ds: Dataseries) {
-    const option = this.canvasList[ds.label].getOption()
-    
-    const ga = option.series[0]
+  applyData() {
+    const modifier = this.modifier
+    console.log('modi', modifier)
+    for (const ds of this.dataSets) {
 
-    let needleColor: string = ds.backgroundColors[ds.backgroundColors.length -1]
-    for (const [i, s] of ds.sections.entries()) {
-      if (s > ds.needleValue) {
-        needleColor = ds.backgroundColors[i - 1] ?? ds.backgroundColors[0]
-        break
+      // const option = this.canvasList[ds.label].getOption()
+      const option = this.template
+      // @ts-ignore
+      const ga = option.series[0],
+      // @ts-ignore
+        ga2 = option.series[1]
+
+      // Title
+      // @ts-ignore
+      option.title.text = ds.label
+      // @ts-ignore
+      option.title.textStyle.fontSize = 16 * modifier
+
+      // Needle
+      ga.data[0].value = ds.needleValue.toFixed()
+      ga.data[0].name = ds.unit
+      ga.detail.color = ds.needleColor
+      ga.detail.fontSize = 40 * modifier
+      // ga.anchor.itemStyle.color = ds.needleColor
+      // ga.pointer.itemStyle.color = ds.needleColor
+
+      // Axis
+      const colorSections = ds.backgroundColors.map((b, i) => [(ds.sections[i+1] - ga.min) / ds.range, b])
+      ga2.axisLine.lineStyle.color = colorSections
+      ga2.axisLine.lineStyle.width = 8 * modifier
+      ga2.min = Math.min(...ds.sections)
+      ga2.max = Math.max(...ds.sections)
+      ga.min = ga2.min
+      ga.max = ga2.max
+      ga2.axisLabel.fontSize = 14 * modifier
+      ga2.axisLabel.distance = -35 * modifier
+      ga2.splitLine.length = 16 * modifier
+      ga2.splitLine.distance = -16 * modifier
+
+      // Progress
+      let progressColor: string = ds.backgroundColors[ds.backgroundColors.length -1]
+      for (const [i, s] of ds.sections.entries()) {
+        if (s > ds.needleValue) {
+          progressColor = ds.backgroundColors[i - 1] ?? ds.backgroundColors[0]
+          break
+        }
       }
+      ga.progress.itemStyle.color = progressColor
+      ga.progress.width = 80 * modifier
+
+      // Apply
+      this.canvasList[ds.label].setOption(option)
     }
 
-    // Needle
-    ga.data[0].value = ds.needleValue.toFixed()
-    ga.detail.formatter = '{value} ' + ds.unit
-    ga.detail.color = ds.needleColor
-    ga.anchor.itemStyle.color = ds.needleColor
-    ga.pointer.itemStyle.color = ds.needleColor
-
-    // Axis
-    const colorSections = ds.backgroundColors.map((b, i) => [(ds.sections[i+1] - ga.min) / ds.range, b])
-    ga.axisLine.lineStyle.color = colorSections
-    option.series[1].axisLine.lineStyle.color = colorSections
-    ga.min = Math.min(...ds.sections)
-    ga.max = Math.max(...ds.sections)
-
-    // Progress
-    ga.progress.itemStyle.color = needleColor
-
-    // Apply
-    this.canvasList[ds.label].resize()
-    this.canvasList[ds.label].setOption(option)
   }
-
 
   createChart() {
     this.dataSets.forEach(ds => {
@@ -364,8 +384,8 @@ export class WidgetGauge extends LitElement {
     }
 
     .chart {
-      aspect-ratio: 2 / 1;
-      width: 400px;
+      width: 600px; /* will be overriden by adjustSizes */
+      height: 300px;
     }
 
   `;
@@ -379,7 +399,7 @@ export class WidgetGauge extends LitElement {
         </header>
         <div class="gauge-container">
           ${repeat(this.dataSets, ds => ds.label, ds => html`
-            <div name="${ds.label}" class="chart"></div>
+            <div name="${ds.label}" class="chart" style="min-width: 600px; min-height: 300px; width: 600px; height: 300px;"></div>
           `)}
         </div>
       </div>
