@@ -71,22 +71,10 @@ export class WidgetGauge extends LitElement {
           },
           axisLine: { show: false },
           axisTick: { show: false },
-          splitLine: {show: false },
-          axisLabel: {show: false },
-          anchor: {
-            show: false,
-            showAbove: true,
-            size: 22,
-            itemStyle: {
-              borderWidth: 0,
-            }
-          },
-          pointer: {
-            show: false,
-            itemStyle: {
-              color: 'auto'
-            }
-          },
+          splitLine: { show: false },
+          axisLabel: { show: false },
+          anchor: { show: false },
+          pointer: { show: false },
           detail: {
             valueAnimation: false,
             fontSize: 25,
@@ -133,6 +121,7 @@ export class WidgetGauge extends LitElement {
           axisLabel: {
             distance: -20,
             color: '#999',
+            rotate: 'tangential',
             fontSize: 12,
           },
         } as GaugeSeriesOption,
@@ -303,7 +292,8 @@ export class WidgetGauge extends LitElement {
       ga2.axisLine.lineStyle.width = 8 * modifier
       ga2.axisLine.lineStyle.color = colorSections
       ga2.axisLabel.fontSize = 20 * modifier
-      ga2.axisLabel.distance = -44 * modifier
+      // ga2.axisLabel.color = ds.needleColor
+      ga2.axisLabel.distance = -24 * modifier
       ga2.splitLine.length = 16 * modifier
       ga2.splitLine.distance = -16 * modifier
 
