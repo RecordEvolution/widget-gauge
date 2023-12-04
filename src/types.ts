@@ -1,5 +1,3 @@
-import type { Chart } from 'chart.js/auto';
-
 export interface Settings {
     title: string
     subTitle: string
@@ -21,7 +19,6 @@ export interface Dataseries {
     data: Data[]
     // not input values
     needleValue: number 
-    chartInstance: Chart
     range: number
     ranges: number[]
 }
