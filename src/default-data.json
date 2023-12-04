@@ -7,7 +7,7 @@
     "order": 1,
     "unit": "°C",
     "needleColor": "black",
-    "sections": [-20, 20, 80, 98],
+    "sections": [-20, 80, 90, 120],
     "backgroundColors": [
       "#AAC8A7",
       "#F1C27B",
@@ -44,7 +44,7 @@
     ],
     "averageLatest": 1,
     "data": [{
-      "value": 80
+      "value": 79
     }]
   }]
 }
