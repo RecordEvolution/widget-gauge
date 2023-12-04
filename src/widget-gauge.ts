@@ -299,7 +299,6 @@ export class WidgetGauge extends LitElement {
 
       // Progress
       let progressColor: string = ds.backgroundColors[ds.backgroundColors.length -1]
-      if (ds.unit === 'Pa') console.log('sections', ds.sections, ds.backgroundColors, colorSections, ds.range)
       for (const [i, s] of ds.sections.entries()) {
         if (s > ds.needleValue) {
           progressColor = ds.backgroundColors[i - 1] ?? ds.backgroundColors[0]
@@ -318,7 +317,6 @@ export class WidgetGauge extends LitElement {
   createChart() {
     this.dataSets.forEach(ds => {
       const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement;
-      console.log('ds', ds.label, canvas)
       if (!canvas) return
       // @ts-ignore
       this.canvasList[ds.label] = echarts.init(canvas);
