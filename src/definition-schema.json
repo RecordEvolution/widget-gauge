@@ -22,8 +22,12 @@
             "items": {
                 "type": "object",
                 "properties": {
-                    "needleColor": {
-                        "title": "Needle Color",
+                    "label": {
+                        "title": "Label",
+                        "type": "string"
+                    },
+                    "valueColor": {
+                        "title": "Value Color",
                         "type": "color"
                     },
                     "order": {

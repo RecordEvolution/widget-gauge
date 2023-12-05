@@ -12,7 +12,7 @@ export interface Dataseries {
     label: string
     order: number
     unit: string
-    needleColor: string
+    valueColor: string
     averageLatest: number
     sections: number[]
     backgroundColors: string[]
