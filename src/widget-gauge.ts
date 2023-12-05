@@ -79,7 +79,8 @@ export class WidgetGauge extends LitElement {
             valueAnimation: false,
             fontSize: 25,
             offsetCenter: [0, '-7%'],
-            color: 'inherit'
+            color: 'inherit',
+            formatter: (val) => isNaN(val) ? '-' : val.toFixed()
           },
           title: {
             offsetCenter: [0, '-35%'],
@@ -211,7 +212,7 @@ export class WidgetGauge extends LitElement {
   async transformData() {
     if(!this?.inputData) return
     this.dataSets = []
-    this.inputData.dataseries.sort((a, b) => a.order - b.order).forEach(ds => {
+    this.inputData.dataseries?.sort((a, b) => a.order - b.order).forEach(ds => {
 
       // pivot data
       const distincts = [...new Set(ds.data.map((d: Data) => d.pivot))]
@@ -274,7 +275,7 @@ export class WidgetGauge extends LitElement {
       option.title.textStyle.fontSize = 22 * modifier
 
       // Needle
-      ga.data[0].value = ds.needleValue.toFixed()
+      ga.data[0].value = ds.needleValue
       ga.data[0].name = ds.unit
       ga.title.fontSize = 20 * modifier
       ga.title.color = ds.needleColor
