@@ -223,7 +223,7 @@ export class WidgetGauge extends LitElement {
             order: ds.order,
             unit: ds.unit,
             averageLatest: ds.averageLatest,
-            needleColor: ds.needleColor,
+            valueColor: ds.valueColor,
             sections: ds.sections,
             backgroundColors: ds.backgroundColors,
             data: ds.data.filter(d => d.pivot === piv)
@@ -278,11 +278,11 @@ export class WidgetGauge extends LitElement {
       ga.data[0].value = ds.needleValue
       ga.data[0].name = ds.unit
       ga.title.fontSize = 20 * modifier
-      ga.title.color = ds.needleColor
-      ga.detail.color = ds.needleColor
+      ga.title.color = ds.valueColor
+      ga.detail.color = ds.valueColor
       ga.detail.fontSize = 40 * modifier
-      // ga.anchor.itemStyle.color = ds.needleColor
-      // ga.pointer.itemStyle.color = ds.needleColor
+      // ga.anchor.itemStyle.color = ds.valueColor
+      // ga.pointer.itemStyle.color = ds.valueColor
 
       // Axis
       ga2.min = Math.min(...ds.sections)
@@ -293,7 +293,7 @@ export class WidgetGauge extends LitElement {
       ga2.axisLine.lineStyle.width = 8 * modifier
       ga2.axisLine.lineStyle.color = colorSections
       ga2.axisLabel.fontSize = 20 * modifier
-      // ga2.axisLabel.color = ds.needleColor
+      // ga2.axisLabel.color = ds.valueColor
       ga2.axisLabel.distance = -24 * modifier
       ga2.splitLine.length = 16 * modifier
       ga2.splitLine.distance = -16 * modifier
