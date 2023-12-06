@@ -8,11 +8,13 @@
             "properties": {
                 "title": {
                     "title": "Title",
-                    "type": "string"
+                    "type": "string",
+                    "order": 1
                 },
                 "subTitle": {
                     "title": "Subtitle",
-                    "type": "string"
+                    "type": "string",
+                    "order": 2
                 }
             }
         },
@@ -24,26 +26,25 @@
                 "properties": {
                     "label": {
                         "title": "Label",
-                        "type": "string"
+                        "type": "string",
+                        "order": 1
                     },
                     "valueColor": {
                         "title": "Value Color",
-                        "type": "color"
-                    },
-                    "order": {
-                        "title": "Draw Order",
-                        "description": "Determines the draw order of the gauges.",
-                        "type": "number"
+                        "type": "color",
+                        "order": 2
                     },
                     "unit": {
                         "title": "Unit",
                         "description": "The unit of the values. e.g. °C or km/h",
-                        "type": "string"
+                        "type": "string",
+                        "order": 3
                     },
                     "sections": {
                         "title": "Sections",
                         "description": "The amount of gauge sections. Starting from the min value, ending with the max value.",
                         "type": "array",
+                        "order": 4,
                         "items": {
                             "type": "string"
                         }
@@ -54,12 +55,14 @@
                         "type": "array",
                         "items": {
                             "type": "color"
-                        }
+                        },
+                        "order": 5
                     },
                     "averageLatest": {
                         "title": "Average Latest Values",
                         "description": "Calculate the average over the given number of newest values. (If pivoted, then per each of the pivot dataseries.) If not specified then the latest value is shown without modification.",
-                        "type": "number"
+                        "type": "number",
+                        "order": 6
                     },
                     "data": {
                         "title": "Data",
@@ -80,7 +83,8 @@
                                 }
                             },
                             "required": ["value"]
-                        }
+                        },
+                        "order": 7
                     }
                 },
                 "required": ["value", "label"]
