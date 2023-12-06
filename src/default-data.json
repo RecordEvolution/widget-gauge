@@ -4,7 +4,6 @@
   },
   "dataseries": [{
     "label": "Demo Gauge 1",
-    "order": 1,
     "unit": "°C",
     "needleColor": "black",
     "sections": [-20, 80, 90, 120],
@@ -32,7 +31,6 @@
     }]
   },{
     "label": "Demo Gauge 2",
-    "order": 2,
     "unit": "Pa",
     "needleColor": "black",
     "sections": [50, 70, 80, 90, 200],
