@@ -2,7 +2,7 @@ import { html, css, LitElement, PropertyValueMap } from 'lit';
 import { repeat } from 'lit/directives/repeat.js'
 import { property, state } from 'lit/decorators.js';
 // import * as echarts from 'echarts';
-import { InputData, Data, Dataseries } from './types.js'
+import { InputData, Data, Dataseries } from './types.js';
 import type { EChartsOption, GaugeSeriesOption } from 'echarts';
 
 // echarts.use([GaugeChart, CanvasRenderer]);
@@ -263,8 +263,8 @@ export class WidgetGauge extends LitElement {
       ga.data[0].value = ds.needleValue.toFixed()
       ga.data[0].name = ds.unit
       ga.title.fontSize = 20 * modifier
-      ga.title.color = ds.valueColor
-      ga.detail.color = ds.valueColor
+      ga.title.color = ds.valueColor ?? 'black'
+      ga.detail.color = ds.valueColor ?? 'black'
       ga.detail.fontSize = 40 * modifier
       // ga.anchor.itemStyle.color = ds.valueColor
       // ga.pointer.itemStyle.color = ds.valueColor

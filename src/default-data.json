@@ -5,7 +5,7 @@
   "dataseries": [{
     "label": "Demo Gauge 1",
     "unit": "°C",
-    "needleColor": "black",
+    "valueColor": "black",
     "sections": [-20, 80, 90, 120],
     "backgroundColors": [
       "#AAC8A7",
@@ -32,14 +32,7 @@
   },{
     "label": "Demo Gauge 2",
     "unit": "Pa",
-    "needleColor": "black",
-    "sections": [50, 70, 80, 90, 200],
-    "backgroundColors": [
-      "#AAC8A7",
-      "#F1C27B",
-      "#FF9B9B",
-      "#FF919B"
-    ],
+    "valueColor": "green",
     "averageLatest": 1,
     "data": [{
       "value": 79
