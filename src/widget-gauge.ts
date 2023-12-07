@@ -18,20 +18,6 @@ export class WidgetGauge extends LitElement {
   @state()
   private canvasList: any = {}
 
-  @state()
-  private textActive: boolean = false
-
-
-  @state()
-  private numberLabels?: NodeListOf<Element>
-  @state()
-  private alignerLabels?: NodeListOf<Element>
-  @state()
-  private titleLabels?: NodeListOf<Element>
-  @state()
-  private spacers?: NodeListOf<Element>
-
-
   resizeObserver: ResizeObserver
   boxes?: HTMLDivElement[]
   origWidth: number = 0
@@ -45,7 +31,7 @@ export class WidgetGauge extends LitElement {
 
     this.template = {
       title: {
-        text: 'Waterfall',
+        text: 'Gauge',
         left: 'center',
         textStyle: {
           fontSize: 10
@@ -104,8 +90,8 @@ export class WidgetGauge extends LitElement {
             lineStyle: {
               width: 20,
               color: [
-                [0.3, '#67e0e3'],
-                [0.7, '#37a2da'],
+                [0.2, '#67e0e3'],
+                [0.8, '#37a2da'],
                 [1, '#fd666d']
               ]
             }
@@ -201,7 +187,6 @@ export class WidgetGauge extends LitElement {
 
     this.modifier = modifier
 
-    this.textActive = true
     for (const canvas in this.canvasList) {
       this.canvasList[canvas].resize()
     }
@@ -238,10 +223,10 @@ export class WidgetGauge extends LitElement {
     // filter latest values and calculate average
     this.dataSets.forEach(ds => {
       ds.data = ds.data.splice(-ds.averageLatest ?? -1)
-      ds.needleValue = ds.data.map(d => d.value).reduce(( p, c ) => p + c, 0) / ds.data.length ?? ds.sections[0]
+      ds.needleValue = ds.data.map(d => d.value).reduce(( p, c ) => p + c, 0) / ds.data.length ?? ds.sections?.[0]
 
-      ds.range = ds.sections[ds.sections.length -1] - ds.sections[0]
-      ds.ranges = ds.sections.map((v, i, a) => v - (a?.[i-1] ?? 0)).slice(1)
+      ds.range = ds.sections?.[ds.sections?.length -1] - ds.sections?.[0] ?? 100
+      ds.ranges = ds.sections?.map((v, i, a) => v - (a?.[i-1] ?? 0)).slice(1) ?? []
     })
 
     this.requestUpdate(); await this.updateComplete
@@ -262,7 +247,7 @@ export class WidgetGauge extends LitElement {
     for (const ds of this.dataSets) {
 
       // const option = this.canvasList[ds.label].getOption()
-      const option = this.template
+      const option = JSON.parse(JSON.stringify(this.template))
       // @ts-ignore
       const ga = option.series[0],
       // @ts-ignore
@@ -275,7 +260,7 @@ export class WidgetGauge extends LitElement {
       option.title.textStyle.fontSize = 22 * modifier
 
       // Needle
-      ga.data[0].value = ds.needleValue
+      ga.data[0].value = ds.needleValue.toFixed()
       ga.data[0].name = ds.unit
       ga.title.fontSize = 20 * modifier
       ga.title.color = ds.valueColor
@@ -285,13 +270,14 @@ export class WidgetGauge extends LitElement {
       // ga.pointer.itemStyle.color = ds.valueColor
 
       // Axis
-      ga2.min = Math.min(...ds.sections)
-      ga2.max = Math.max(...ds.sections)
+      ga2.min = ds.sections?.length ? Math.min(...ds.sections) : 0
+      ga2.max = ds.sections?.length ? Math.max(...ds.sections) : 100
       ga.min = ga2.min
       ga.max = ga2.max
-      const colorSections = ds.backgroundColors.map((b, i) => [(ds.sections[i+1] - ga.min) / ds.range, b])
+      // @ts-ignore
+      const colorSections = ds.backgroundColors?.map((b: string, i) => [(ds.sections?.[i+1] - ga.min) / ds.range, b]).filter(([s]) => !isNaN(s))      
       ga2.axisLine.lineStyle.width = 8 * modifier
-      ga2.axisLine.lineStyle.color = colorSections
+      ga2.axisLine.lineStyle.color = colorSections?.length ? colorSections : ga2.axisLine.lineStyle.color
       ga2.axisLabel.fontSize = 20 * modifier
       // ga2.axisLabel.color = ds.valueColor
       ga2.axisLabel.distance = -24 * modifier
@@ -299,8 +285,8 @@ export class WidgetGauge extends LitElement {
       ga2.splitLine.distance = -16 * modifier
 
       // Progress
-      let progressColor: string = ds.backgroundColors[ds.backgroundColors.length -1]
-      for (const [i, s] of ds.sections.entries()) {
+      let progressColor: string = ds.backgroundColors?.[ds.backgroundColors.length -1] ?? 'green'
+      for (const [i, s] of ds.sections?.entries() ?? []) {
         if (s > ds.needleValue) {
           progressColor = ds.backgroundColors[i - 1] ?? ds.backgroundColors[0]
           break
@@ -308,9 +294,8 @@ export class WidgetGauge extends LitElement {
       }
       ga.progress.itemStyle.color = progressColor
       ga.progress.width = 80 * modifier
-
       // Apply
-      this.canvasList[ds.label].setOption(option)
+      this.canvasList[ds.label]?.setOption(option)
     }
 
   }
