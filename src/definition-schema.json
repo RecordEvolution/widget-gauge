@@ -27,6 +27,7 @@
                     "label": {
                         "title": "Label",
                         "type": "string",
+                        "required": true,
                         "order": 1
                     },
                     "valueColor": {
@@ -74,20 +75,19 @@
                             "properties": {
                                 "value": {
                                     "title": "Value",
-                                    "type": "number"
+                                    "type": "number",
+                                    "required": true
                                 },
                                 "pivot": {
                                     "title": "Pivot Column",
                                     "description": "You can specify a column in the input data to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as pivot column, then you will get a gauge for each city.",
                                     "type": "string"
                                 }
-                            },
-                            "required": ["value"]
+                            }
                         },
                         "order": 7
                     }
-                },
-                "required": ["value", "label"]
+                }
             }
         }
     }
