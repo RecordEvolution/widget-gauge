@@ -5,6 +5,7 @@
         "settings": {
             "title": "Global Settings",
             "type": "object",
+            "order": 1,
             "properties": {
                 "title": {
                     "title": "Title",
@@ -21,6 +22,7 @@
         "dataseries": {
             "title": "Gauges",
             "type": "array",
+            "order": 2,
             "items": {
                 "type": "object",
                 "properties": {
@@ -69,6 +71,7 @@
                         "title": "Data",
                         "description": "The data used to draw this data series.",
                         "type": "array",
+                        "order": 7,
                         "buffersize": 1000,
                         "items": {
                             "type": "object",
@@ -76,16 +79,17 @@
                                 "value": {
                                     "title": "Value",
                                     "type": "number",
+                                    "order": 1,
                                     "required": true
                                 },
                                 "pivot": {
                                     "title": "Pivot Column",
                                     "description": "You can specify a column in the input data to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as pivot column, then you will get a gauge for each city.",
+                                    "order": 2,
                                     "type": "string"
                                 }
                             }
-                        },
-                        "order": 7
+                        }
                     }
                 }
             }
