@@ -121,6 +121,7 @@ export class WidgetGauge extends LitElement {
     changedProperties.forEach((oldValue, propName) => {
       if (propName === 'inputData') {
         this.transformData()
+        this.adjustSizes()
       }
     })
 
@@ -131,6 +132,8 @@ export class WidgetGauge extends LitElement {
 
   protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
       this.sizingSetup()
+      this.transformData()
+      this.adjustSizes()
   }
 
   sizingSetup() {
@@ -226,6 +229,7 @@ export class WidgetGauge extends LitElement {
       ds.needleValue = ds.data.map(d => d.value).reduce(( p, c ) => p + c, 0) / ds.data.length ?? ds.sections?.[0]
 
       ds.range = ds.sections?.[ds.sections?.length -1] - ds.sections?.[0] ?? 100
+      if (isNaN(ds.range)) ds.range = 100
       ds.ranges = ds.sections?.map((v, i, a) => v - (a?.[i-1] ?? 0)).slice(1) ?? []
     })
 
