@@ -6,14 +6,10 @@
     "version": "1.5.12",
     "type": "module",
     "main": "dist/widget-gauge.js",
-    "unpkg": "dist/widget-gauge.js",
-    "module": "dist/widget-gauge.js",
-    "exports": {
-        ".": "./dist/src/index.js",
-        "./widget-gauge.js": "./dist/src/widget-gauge.js"
-    },
+    "types": "dist/src/widget-gauge.d.ts",
     "files": [
-        "dist"
+        "dist",
+        "src"
     ],
     "scripts": {
         "analyze": "cem analyze --litelement",
