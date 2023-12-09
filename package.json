@@ -3,7 +3,7 @@
     "description": "REWidget widget-gauge",
     "license": "MIT",
     "author": "widget-gauge",
-    "version": "1.5.10",
+    "version": "1.5.11",
     "type": "module",
     "main": "dist/src/widget-gauge.js",
     "unpkg": "dist/src/widget-gauge.js",
