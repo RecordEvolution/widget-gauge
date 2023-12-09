@@ -3,7 +3,7 @@
     "description": "REWidget widget-gauge",
     "license": "MIT",
     "author": "widget-gauge",
-    "version": "1.5.9",
+    "version": "1.5.10",
     "type": "module",
     "main": "dist/src/index.js",
     "unpkg": "dist/src/index.js",
