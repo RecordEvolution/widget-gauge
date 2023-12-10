@@ -10,7 +10,6 @@ export interface Data {
 }
 export interface Dataseries {
     label: string
-    order: number
     unit: string
     valueColor: string
     averageLatest: number

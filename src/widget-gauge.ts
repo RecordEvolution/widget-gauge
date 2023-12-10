@@ -1,15 +1,15 @@
 import { html, css, LitElement, PropertyValueMap } from 'lit';
 import { repeat } from 'lit/directives/repeat.js'
 import { property, state } from 'lit/decorators.js';
-// import * as echarts from 'echarts';
+// import * as echarts from "echarts";
 import { InputData, Data, Dataseries } from './types.js';
 import type { EChartsOption, GaugeSeriesOption } from 'echarts';
 
 // echarts.use([GaugeChart, CanvasRenderer]);
 
 export class WidgetGauge extends LitElement {
-  
-  @property({type: Object}) 
+
+  @property({ type: Object })
   inputData?: InputData = undefined
 
   @state()
@@ -96,7 +96,7 @@ export class WidgetGauge extends LitElement {
               ]
             }
           },
-          axisTick: { show: false},
+          axisTick: { show: false },
           splitLine: {
             length: 15,
             distance: -25,
@@ -122,27 +122,28 @@ export class WidgetGauge extends LitElement {
       if (propName === 'inputData') {
         this.transformData()
         this.adjustSizes()
+        this.applyData()
       }
     })
-
-    this.sizingSetup()
 
     super.update(changedProperties)
   }
 
   protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-      this.sizingSetup()
-      this.transformData()
-      this.adjustSizes()
+    this.sizingSetup()
+    this.transformData()
+    this.adjustSizes()
+    this.applyData()
+
   }
 
   sizingSetup() {
     if (this.origWidth !== 0 && this.origHeight !== 0) return
 
     this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
-
-    this.origWidth = this.boxes?.map(b => b.getBoundingClientRect().width).reduce((p, c) => c > p ? c : p, 0 ) ?? 0
-    this.origHeight = this.boxes?.map(b => b.getBoundingClientRect().height).reduce((p, c) => c > p ? c : p, 0 ) ?? 0
+    if (!this.boxes.length) return
+    this.origWidth = this.boxes?.map(b => b.getBoundingClientRect().width).reduce((p, c) => c > p ? c : p, 0) ?? 0
+    this.origHeight = this.boxes?.map(b => b.getBoundingClientRect().height).reduce((p, c) => c > p ? c : p, 0) ?? 0
 
     if (this.origWidth > 0) this.origWidth += 16
     if (this.origHeight > 0) this.origHeight += 16
@@ -154,61 +155,58 @@ export class WidgetGauge extends LitElement {
     // console.log('adjustSizes')
     // if (!this.origHeight) return
     const container = this.shadowRoot?.querySelector('.gauge-container') as HTMLDivElement
+    if (!container) return
     const userWidth = container.getBoundingClientRect().width
     const userHeight = container.getBoundingClientRect().height
     const count = this.dataSets.length
 
     const width = this.origWidth
     const height = this.origHeight
-
+    if (!userHeight || !userWidth || !width || !height) return
     const fits = []
     for (let c = 1; c <= count; c++) {
-      const r = Math.ceil(count/c)
-      const uwgap = (userWidth - 12 * (c-1))
-      const uhgap = (userHeight - 12 * (r-1))
+      const r = Math.ceil(count / c)
+      const uwgap = (userWidth - 12 * (c - 1))
+      const uhgap = (userHeight - 12 * (r - 1))
       const m = uwgap / width / c
       const size = m * m * width * height * count
-      if (r * m * height < uhgap) fits.push({c, m, size, width, height, userWidth, userHeight})
+      if (r * m * height < uhgap) fits.push({ c, m, size, width, height, userWidth, userHeight })
     }
 
     for (let r = 1; r <= count; r++) {
-      const c = Math.ceil(count/r)
-      const uwgap = (userWidth - 12 * (c-1))
-      const uhgap = (userHeight - 12 * (r-1))
+      const c = Math.ceil(count / r)
+      const uwgap = (userWidth - 12 * (c - 1))
+      const uhgap = (userHeight - 12 * (r - 1))
       const m = uhgap / height / r
       const size = m * m * width * height * count
-      if (c * m * width < uwgap) fits.push({r, m, size, width, height, userWidth, userHeight})
+      if (c * m * width < uwgap) fits.push({ r, m, size, width, height, userWidth, userHeight })
     }
 
     const maxSize = fits.reduce((p, c) => c.size < p ? p : c.size, 0)
     const fit = fits.find(f => f.size === maxSize)
     const modifier = (fit?.m ?? 0)
 
-    // console.log('FITS', fits, 'modifier', modifier, 'cols',fit?.c, 'rows', fit?.r, 'new size', fit?.size.toFixed(0), 'total space', (userWidth* userHeight).toFixed(0))
+    // console.log('FITS count', count, userWidth, userHeight, 'modifier', modifier, 'cols',fit?.c, 'rows', fit?.r, 'new size', fit?.size.toFixed(0), 'total space', (userWidth* userHeight).toFixed(0))
 
-    this.boxes?.forEach(box => box.setAttribute("style", `width:${modifier*width}px; height:${modifier*height}px`))
+    this.boxes?.forEach(box => box.setAttribute("style", `width:${modifier * width}px; height:${modifier * height}px`))
 
     this.modifier = modifier
 
     for (const canvas in this.canvasList) {
       this.canvasList[canvas].resize()
     }
-    this.applyData()
-
   }
 
   async transformData() {
-    if(!this?.inputData) return
+    if (!this?.inputData) return
     this.dataSets = []
-    this.inputData.dataseries?.sort((a, b) => a.order - b.order).forEach(ds => {
-
+    this.inputData.dataseries?.forEach(ds => {
       // pivot data
       const distincts = [...new Set(ds.data.map((d: Data) => d.pivot))]
       if (distincts.length > 1) {
         distincts.forEach((piv) => {
           const pds: any = {
             label: `${ds.label} ${piv}`,
-            order: ds.order,
             unit: ds.unit,
             averageLatest: ds.averageLatest,
             valueColor: ds.valueColor,
@@ -223,44 +221,31 @@ export class WidgetGauge extends LitElement {
       }
     })
 
-    // filter latest values and calculate average
-    this.dataSets.forEach(ds => {
-      ds.data = ds.data.splice(-ds.averageLatest ?? -1)
-      ds.needleValue = ds.data.map(d => d.value).reduce(( p, c ) => p + c, 0) / ds.data.length ?? ds.sections?.[0]
-
-      ds.range = ds.sections?.[ds.sections?.length -1] - ds.sections?.[0] ?? 100
-      if (isNaN(ds.range)) ds.range = 100
-      ds.ranges = ds.sections?.map((v, i, a) => v - (a?.[i-1] ?? 0)).slice(1) ?? []
-    })
-
-    this.requestUpdate(); await this.updateComplete
-
     // console.log('Gauge Datasets', this.dataSets)
 
-    // create charts
-    if (!Object.entries(this.canvasList).length) {
-      this.createChart()
-    }
-
-    // update chart info
-    this.applyData()
   }
 
   applyData() {
     const modifier = this.modifier
+    this.setupCharts()
     for (const ds of this.dataSets) {
+
+      // compute derivative values
+      // filter latest values and calculate average
+      ds.data = ds.data.splice(-ds.averageLatest ?? -1)
+      ds.needleValue = ds.data.map(d => d.value).reduce((p, c) => p + c, 0) / ds.data.length ?? ds.sections?.[0]
+
+      ds.range = ds.sections?.[ds.sections?.length - 1] - ds.sections?.[0] ?? 100
+      if (isNaN(ds.range)) ds.range = 100
+      ds.ranges = ds.sections?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
 
       // const option = this.canvasList[ds.label].getOption()
       const option = JSON.parse(JSON.stringify(this.template))
-      // @ts-ignore
       const ga = option.series[0],
-      // @ts-ignore
         ga2 = option.series[1]
 
       // Title
-      // @ts-ignore
       option.title.text = ds.label
-      // @ts-ignore
       option.title.textStyle.fontSize = 22 * modifier
 
       // Needle
@@ -279,7 +264,7 @@ export class WidgetGauge extends LitElement {
       ga.min = ga2.min
       ga.max = ga2.max
       // @ts-ignore
-      const colorSections = ds.backgroundColors?.map((b: string, i) => [(ds.sections?.[i+1] - ga.min) / ds.range, b]).filter(([s]) => !isNaN(s))      
+      const colorSections = ds.backgroundColors?.map((b: string, i) => [(ds.sections?.[i + 1] - ga.min) / ds.range, b]).filter(([s]) => !isNaN(s))
       ga2.axisLine.lineStyle.width = 8 * modifier
       ga2.axisLine.lineStyle.color = colorSections?.length ? colorSections : ga2.axisLine.lineStyle.color
       ga2.axisLabel.fontSize = 20 * modifier
@@ -289,7 +274,7 @@ export class WidgetGauge extends LitElement {
       ga2.splitLine.distance = -16 * modifier
 
       // Progress
-      let progressColor: string = ds.backgroundColors?.[ds.backgroundColors.length -1] ?? 'green'
+      let progressColor: string = ds.backgroundColors?.[ds.backgroundColors.length - 1] ?? 'green'
       for (const [i, s] of ds.sections?.entries() ?? []) {
         if (s > ds.needleValue) {
           progressColor = ds.backgroundColors[i - 1] ?? ds.backgroundColors[0]
@@ -304,14 +289,22 @@ export class WidgetGauge extends LitElement {
 
   }
 
-  createChart() {
+  setupCharts() {
+
+    // remove the gauge canvases of non provided data series
+    for (const label in this.canvasList) {
+      const ex = this.dataSets.find(ds => ds.label === label)
+      if (!ex) delete this.canvasList[label]
+    }
+
     this.dataSets.forEach(ds => {
+      if (this.canvasList[ds.label]) return
       const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement;
       if (!canvas) return
       // @ts-ignore
       this.canvasList[ds.label] = echarts.init(canvas);
       this.canvasList[ds.label].setOption(JSON.parse(JSON.stringify(this.template)))
-      
+
     })
 
   }
