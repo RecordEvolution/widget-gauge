@@ -332,6 +332,8 @@ export class WidgetGauge extends LitElement {
     .gauge-container {
       display: flex;
       flex: 1;
+      justify-content: center;
+      align-items: center;
       flex-wrap: wrap;
       overflow: hidden;
       position: relative;
