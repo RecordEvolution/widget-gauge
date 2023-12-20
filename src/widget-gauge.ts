@@ -27,7 +27,6 @@ export class WidgetGauge extends LitElement {
   constructor() {
     super()
     this.resizeObserver = new ResizeObserver(this.adjustSizes.bind(this))
-    this.resizeObserver.observe(this)
 
     this.template = {
       title: {
@@ -121,7 +120,6 @@ export class WidgetGauge extends LitElement {
     changedProperties.forEach((oldValue, propName) => {
       if (propName === 'inputData') {
         this.transformData()
-        this.adjustSizes()
         this.applyData()
       }
     })
@@ -130,6 +128,8 @@ export class WidgetGauge extends LitElement {
   }
 
   protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    this.resizeObserver.observe(this.shadowRoot?.querySelector('.wrapper') as HTMLDivElement)
+
     this.sizingSetup()
     this.transformData()
     this.adjustSizes()
@@ -152,7 +152,6 @@ export class WidgetGauge extends LitElement {
   }
 
   adjustSizes() {
-    // console.log('adjustSizes')
     // if (!this.origHeight) return
     const container = this.shadowRoot?.querySelector('.gauge-container') as HTMLDivElement
     if (!container) return
@@ -195,6 +194,7 @@ export class WidgetGauge extends LitElement {
     for (const canvas in this.canvasList) {
       this.canvasList[canvas].resize()
     }
+    this.applyData()
   }
 
   async transformData() {
@@ -250,12 +250,13 @@ export class WidgetGauge extends LitElement {
       option.title.textStyle.fontSize = 22 * modifier
 
       // Needle
-      ga.data[0].value = ds.needleValue.toFixed()
+      ga.data[0].value = ds.needleValue
       ga.data[0].name = ds.unit
       ga.title.fontSize = 20 * modifier
       ga.title.color = ds.valueColor ?? 'black'
       ga.detail.color = ds.valueColor ?? 'black'
       ga.detail.fontSize = 40 * modifier
+      ga.detail.formatter = (val: number) => isNaN(val) ? '-' : val.toFixed(0)
       // ga.anchor.itemStyle.color = ds.valueColor
       // ga.pointer.itemStyle.color = ds.valueColor
 
