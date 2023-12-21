@@ -3,7 +3,7 @@
 
   },
   "dataseries": [{
-    "label": "Demo Gauge 1",
+    "label": "Demo Gauge Temperature",
     "unit": "°C",
     "valueColor": "black",
     "sections": [-20, 80, 90, 120],
@@ -16,21 +16,9 @@
     "data": [{
       "value": 90,
       "pivot": "Frankfurt"
-    },{
-      "value": 40,
-      "pivot": "Berlin"
-    },{
-      "value": 70,
-      "pivot": "Berlin"
-    },{
-      "value": 200,
-      "pivot": "Frankfurt"
-    },{
-      "value": 20,
-      "pivot": "München"
     }]
   },{
-    "label": "Demo Gauge 2",
+    "label": "Demo Gauge Pascal",
     "unit": "Pa",
     "valueColor": "green",
     "averageLatest": 1,
