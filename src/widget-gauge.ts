@@ -24,6 +24,7 @@ export class WidgetGauge extends LitElement {
   origHeight: number = 0
   template: EChartsOption
   modifier: number = 1
+  version: string = 'versionplaceholder'
   constructor() {
     super()
     this.resizeObserver = new ResizeObserver(this.adjustSizes.bind(this))
@@ -390,4 +391,4 @@ export class WidgetGauge extends LitElement {
   }
 }
 
-window.customElements.define('widget-gauge', WidgetGauge);
+window.customElements.define('widget-gauge-versionplaceholder', WidgetGauge);
