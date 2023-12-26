@@ -2,7 +2,7 @@ export interface Settings {
     title: string
     subTitle: string
     columnLayout: boolean
-  }
+}
 
 export interface Data {
     value: number
@@ -17,7 +17,7 @@ export interface Dataseries {
     backgroundColors: string[]
     data: Data[]
     // not input values
-    needleValue: number 
+    needleValue: number
     range: number
     ranges: number[]
 }
