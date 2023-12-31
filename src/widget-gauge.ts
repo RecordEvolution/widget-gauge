@@ -2,14 +2,17 @@ import { html, css, LitElement, PropertyValueMap } from 'lit'
 import { repeat } from 'lit/directives/repeat.js'
 import { property, state } from 'lit/decorators.js'
 // import * as echarts from "echarts";
-import { InputData, Data, Dataseries } from './types.js'
 import type { EChartsOption, GaugeSeriesOption } from 'echarts'
+import { GaugeChartConfiguration } from './definition-schema.js'
 
 // echarts.use([GaugeChart, CanvasRenderer]);
 
+type Dataseries = Exclude<GaugeChartConfiguration['dataseries'], undefined>[number]
+type Data = Exclude<Dataseries['data'], undefined>[number]
+
 export class WidgetGauge extends LitElement {
     @property({ type: Object })
-    inputData?: InputData = undefined
+    inputData?: GaugeChartConfiguration
 
     @state()
     private dataSets: Dataseries[] = []
@@ -203,7 +206,7 @@ export class WidgetGauge extends LitElement {
         this.dataSets = []
         this.inputData.dataseries?.forEach((ds) => {
             // pivot data
-            const distincts = [...new Set(ds.data.map((d: Data) => d.pivot))]
+            const distincts = [...new Set(ds?.data?.map((d: Data) => d.pivot))]
             if (distincts.length > 1) {
                 distincts.forEach((piv) => {
                     const pds: any = {
@@ -213,7 +216,7 @@ export class WidgetGauge extends LitElement {
                         valueColor: ds.valueColor,
                         sections: ds.sections,
                         backgroundColors: ds.backgroundColors,
-                        data: ds.data.filter((d) => d.pivot === piv)
+                        data: ds?.data?.filter((d) => d.pivot === piv)
                     }
                     this.dataSets.push(pds)
                 })
@@ -232,12 +235,14 @@ export class WidgetGauge extends LitElement {
             // compute derivative values
             // filter latest values and calculate average
             if (typeof ds.averageLatest !== 'number' || !isNaN(ds.averageLatest)) ds.averageLatest = 1
-            ds.data = ds.data.splice(-ds.averageLatest || -1)
-            ds.needleValue =
-                ds.data.map((d) => d.value).reduce((p, c) => p + c, 0) / ds.data.length ?? ds.sections?.[0]
+            ds.data = ds?.data?.splice(-ds.averageLatest || -1)
+            const values = (ds?.data?.map((d) => d.value)?.filter((p) => p !== undefined) ?? []) as number[]
+            const average = values.reduce((p, c) => p + c, 0) / values.length
 
-            ds.range = ds.sections?.[ds.sections?.length - 1] - ds.sections?.[0] ?? 100
-            if (isNaN(ds.range)) ds.range = 100
+            ds.needleValue = isNaN(average) ? ds.sections?.[0] : average
+
+            ds.range = (ds.sections?.[ds.sections?.length - 1] ?? 100) - (ds.sections?.[0] ?? 0)
+            if (isNaN(ds.range as number)) ds.range = 100
             ds.ranges = ds.sections?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
 
             // const option = this.canvasList[ds.label].getOption()
@@ -265,10 +270,9 @@ export class WidgetGauge extends LitElement {
             ga2.max = ds.sections?.length ? Math.max(...ds.sections) : 100
             ga.min = ga2.min
             ga.max = ga2.max
-            // @ts-ignore
             const colorSections = ds.backgroundColors
-                ?.map((b: string, i) => [(ds.sections?.[i + 1] - ga.min) / ds.range, b])
-                .filter(([s]) => !isNaN(s))
+                ?.map((b, i) => [((ds.sections?.[i + 1] ?? ga.min) - ga.min) / (ds.range as number), b])
+                .filter(([s]) => !isNaN(s as number))
             ga2.axisLine.lineStyle.width = 8 * modifier
             ga2.axisLine.lineStyle.color = colorSections?.length
                 ? colorSections
@@ -280,10 +284,10 @@ export class WidgetGauge extends LitElement {
             ga2.splitLine.distance = -16 * modifier
 
             // Progress
-            let progressColor: string = ds.backgroundColors?.[ds.backgroundColors.length - 1] ?? 'green'
+            let progressColor = ds.backgroundColors?.[ds.backgroundColors.length - 1] ?? 'green'
             for (const [i, s] of ds.sections?.entries() ?? []) {
-                if (s > ds.needleValue) {
-                    progressColor = ds.backgroundColors[i - 1] ?? ds.backgroundColors[0]
+                if (s > (ds.needleValue as number)) {
+                    progressColor = ds.backgroundColors?.[i - 1] ?? ds.backgroundColors?.[0] ?? 'green'
                     break
                 }
             }

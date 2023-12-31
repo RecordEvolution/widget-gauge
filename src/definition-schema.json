@@ -25,6 +25,7 @@
             "order": 2,
             "items": {
                 "type": "object",
+                "required": ["label"],
                 "properties": {
                     "label": {
                         "title": "Label",
@@ -49,7 +50,7 @@
                         "type": "array",
                         "order": 4,
                         "items": {
-                            "type": "string"
+                            "type": "number"
                         }
                     },
                     "backgroundColors": {
@@ -75,6 +76,7 @@
                         "buffersize": 1000,
                         "items": {
                             "type": "object",
+                            "required": ["value"],
                             "properties": {
                                 "value": {
                                     "title": "Value",
