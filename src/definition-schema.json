@@ -25,7 +25,6 @@
             "order": 2,
             "items": {
                 "type": "object",
-                "required": ["label"],
                 "properties": {
                     "label": {
                         "title": "Label",
@@ -76,7 +75,6 @@
                         "buffersize": 1000,
                         "items": {
                             "type": "object",
-                            "required": ["value"],
                             "properties": {
                                 "value": {
                                     "title": "Value",
