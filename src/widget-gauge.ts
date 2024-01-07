@@ -231,6 +231,9 @@ export class WidgetGauge extends LitElement {
     applyData() {
         const modifier = this.modifier
         this.setupCharts()
+        this.dataSets.sort((a, b) => (a.label < b.label ? 1 : -1))
+        this.requestUpdate()
+
         for (const ds of this.dataSets) {
             // compute derivative values
             // filter latest values and calculate average
