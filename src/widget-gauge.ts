@@ -122,7 +122,7 @@ export class WidgetGauge extends LitElement {
         changedProperties.forEach((oldValue, propName) => {
             if (propName === 'inputData') {
                 this.transformData()
-                this.applyData()
+                this.adjustSizes()
             }
         })
 
