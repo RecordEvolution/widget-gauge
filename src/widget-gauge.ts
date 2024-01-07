@@ -135,7 +135,6 @@ export class WidgetGauge extends LitElement {
         this.sizingSetup()
         this.transformData()
         this.adjustSizes()
-        this.applyData()
     }
 
     sizingSetup() {
