@@ -46,7 +46,7 @@ export class WidgetGauge extends LitElement {
                     endAngle: 0,
                     min: 33,
                     max: 99,
-                    radius: '120%',
+                    radius: '121%',
                     center: ['50%', '90%'],
                     progress: {
                         show: true,
@@ -148,9 +148,7 @@ export class WidgetGauge extends LitElement {
         this.origHeight =
             this.boxes?.map((b) => b.getBoundingClientRect().height).reduce((p, c) => (c > p ? c : p), 0) ?? 0
 
-        if (this.origWidth > 0) this.origWidth += 16
-        if (this.origHeight > 0) this.origHeight += 16
-        // console.log('OrigWidth', this.origWidth, this.origHeight)
+        console.log('OrigWidth', this.origWidth, this.origHeight)
     }
 
     adjustSizes() {
@@ -171,7 +169,7 @@ export class WidgetGauge extends LitElement {
             const uhgap = userHeight - 12 * (r - 1)
             const m = uwgap / width / c
             const size = m * m * width * height * count
-            if (r * m * height < uhgap) fits.push({ c, m, size, width, height, userWidth, userHeight })
+            if (r * m * height <= uhgap) fits.push({ c, r, m, size, uwgap, uhgap })
         }
 
         for (let r = 1; r <= count; r++) {
@@ -180,14 +178,25 @@ export class WidgetGauge extends LitElement {
             const uhgap = userHeight - 12 * (r - 1)
             const m = uhgap / height / r
             const size = m * m * width * height * count
-            if (c * m * width < uwgap) fits.push({ r, m, size, width, height, userWidth, userHeight })
+            if (c * m * width <= uwgap) fits.push({ c, r, m, size, uwgap, uhgap })
         }
 
         const maxSize = fits.reduce((p, c) => (c.size < p ? p : c.size), 0)
         const fit = fits.find((f) => f.size === maxSize)
         const modifier = fit?.m ?? 0
 
-        // console.log('FITS count', count, userWidth, userHeight, 'modifier', modifier, 'cols',fit?.c, 'rows', fit?.r, 'new size', fit?.size.toFixed(0), 'total space', (userWidth* userHeight).toFixed(0))
+        // console.log(
+        //     'FITS count',
+        //     userWidth,
+        //     count,
+        //     fit,
+        //     fits,
+        //     'new size',
+        //     fit?.size.toFixed(0),
+        //     'total space',
+        //     (userWidth * userHeight).toFixed(0),
+        //     this.boxes
+        // )
 
         this.boxes?.forEach((box) =>
             box.setAttribute('style', `width:${modifier * width}px; height:${modifier * height}px`)
@@ -377,14 +386,17 @@ export class WidgetGauge extends LitElement {
 
         .chart {
             width: 600px; /* will be overriden by adjustSizes */
-            height: 300px;
+            height: 400px;
         }
     `
 
     render() {
         return html`
             <div class="wrapper">
-                <header>
+                <header
+                    class="paging"
+                    ?active=${this.inputData?.settings?.title || this.inputData?.settings?.subTitle}
+                >
                     <h3 class="paging" ?active=${this.inputData?.settings?.title}>
                         ${this.inputData?.settings?.title}
                     </h3>
@@ -400,7 +412,7 @@ export class WidgetGauge extends LitElement {
                             <div
                                 name="${ds.label}"
                                 class="chart"
-                                style="min-width: 600px; min-height: 300px; width: 600px; height: 300px;"
+                                style="min-width: 600px; min-height: 400px; width: 600px; height: 400px;"
                             ></div>
                         `
                     )}
