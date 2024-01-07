@@ -153,6 +153,7 @@ export class WidgetGauge extends LitElement {
     adjustSizes() {
         // if (!this.origHeight) return
         const container = this.shadowRoot?.querySelector('.gauge-container') as HTMLDivElement
+        console.log('sizing container', container, this)
         if (!container) return
         const userWidth = container.getBoundingClientRect().width
         const userHeight = container.getBoundingClientRect().height
