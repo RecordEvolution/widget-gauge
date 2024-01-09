@@ -153,7 +153,6 @@ export class WidgetGauge extends LitElement {
     adjustSizes() {
         // if (!this.origHeight) return
         const container = this.shadowRoot?.querySelector('.gauge-container') as HTMLDivElement
-        console.log('sizing container', container, this)
         if (!container) return
         const userWidth = container.getBoundingClientRect().width
         const userHeight = container.getBoundingClientRect().height
@@ -197,6 +196,7 @@ export class WidgetGauge extends LitElement {
         //     (userWidth * userHeight).toFixed(0),
         //     this.boxes
         // )
+        this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
 
         this.boxes?.forEach((box) =>
             box.setAttribute('style', `width:${modifier * width}px; height:${modifier * height}px`)
