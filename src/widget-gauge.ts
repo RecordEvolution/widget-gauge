@@ -215,8 +215,8 @@ export class WidgetGauge extends LitElement {
         this.dataSets = []
         this.inputData.dataseries?.forEach((ds) => {
             // pivot data
-            const distincts = [...new Set(ds?.data?.map((d: Data) => d.pivot))]
-            if (distincts.length > 1) {
+            const distincts = [...new Set(ds?.data?.map((d: Data) => d.pivot))].filter((d) => d)
+            if (distincts.length > 0) {
                 distincts.forEach((piv) => {
                     const pds: any = {
                         label: `${piv}-${ds.label ?? ''}`,
@@ -240,7 +240,11 @@ export class WidgetGauge extends LitElement {
     applyData() {
         const modifier = this.modifier
         this.setupCharts()
-        this.dataSets.sort((a, b) => (a.label < b.label ? 1 : -1))
+        this.dataSets.forEach((d) => {
+            d.label ??= ''
+        })
+
+        this.dataSets.sort((a, b) => ((a.label as string) > (b.label as string) ? 1 : -1))
         this.requestUpdate()
 
         for (const ds of this.dataSets) {
@@ -267,6 +271,13 @@ export class WidgetGauge extends LitElement {
             option.title.textStyle.fontSize = 22 * modifier
 
             // Needle
+            // Check age of data Latency
+            const tsp = Date.parse(ds.data?.[0].tsp ?? '')
+            if (isNaN(tsp)) {
+                const now = new Date().getTime()
+                if (now - tsp > (ds.maxLatency ?? Infinity) * 1000) ds.needleValue = undefined
+            }
+
             ga.data[0].value = ds.needleValue
             ga.data[0].name = ds.unit
             ga.title.fontSize = 20 * modifier
@@ -306,7 +317,7 @@ export class WidgetGauge extends LitElement {
             ga.progress.itemStyle.color = progressColor
             ga.progress.width = 80 * modifier
             // Apply
-            this.canvasList[ds.label]?.setOption(option)
+            this.canvasList[ds.label ?? '']?.setOption(option)
         }
     }
 
@@ -318,12 +329,12 @@ export class WidgetGauge extends LitElement {
         }
 
         this.dataSets.forEach((ds) => {
-            if (this.canvasList[ds.label]) return
+            if (this.canvasList[ds.label ?? '']) return
             const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement
             if (!canvas) return
             // @ts-ignore
-            this.canvasList[ds.label] = echarts.init(canvas)
-            this.canvasList[ds.label].setOption(JSON.parse(JSON.stringify(this.template)))
+            this.canvasList[ds.label ?? ''] = echarts.init(canvas)
+            this.canvasList[ds.label ?? ''].setOption(JSON.parse(JSON.stringify(this.template)))
         })
     }
 
@@ -410,7 +421,7 @@ export class WidgetGauge extends LitElement {
                         (ds) => ds.label,
                         (ds) => html`
                             <div
-                                name="${ds.label}"
+                                name="${ds.label ?? ''}"
                                 class="chart"
                                 style="min-width: 600px; min-height: 400px; width: 600px; height: 400px;"
                             ></div>

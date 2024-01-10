@@ -67,25 +67,37 @@
                         "type": "number",
                         "order": 6
                     },
+                    "maxLatency": {
+                        "title": "Maximum Latency",
+                        "description": "If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.",
+                        "type": "number",
+                        "order": 7
+                    },
                     "data": {
                         "title": "Data",
                         "description": "The data used to draw this data series.",
                         "type": "array",
-                        "order": 7,
+                        "order": 8,
                         "buffersize": 1000,
                         "items": {
                             "type": "object",
                             "properties": {
+                                "tsp": {
+                                    "title": "Timestamp",
+                                    "description": "This should be an ISO String date like 2023-11-04T22:47:52.351152+00:00. Will only be used to detect data age of data.",
+                                    "type": "string",
+                                    "order": 1
+                                },
                                 "value": {
                                     "title": "Value",
                                     "type": "number",
-                                    "order": 1,
+                                    "order": 2,
                                     "required": true
                                 },
                                 "pivot": {
                                     "title": "Pivot Column",
                                     "description": "You can specify a column in the input data to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as pivot column, then you will get a gauge for each city.",
-                                    "order": 2,
+                                    "order": 3,
                                     "type": "string"
                                 }
                             }
