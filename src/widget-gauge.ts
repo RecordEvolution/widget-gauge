@@ -219,7 +219,7 @@ export class WidgetGauge extends LitElement {
             if (distincts.length > 0) {
                 distincts.forEach((piv) => {
                     const pds: any = {
-                        label: `${piv}-${ds.label ?? ''}`,
+                        label: `${piv ?? ''}-${ds.label ?? ''}`,
                         unit: ds.unit,
                         averageLatest: ds.averageLatest,
                         valueColor: ds.valueColor,
