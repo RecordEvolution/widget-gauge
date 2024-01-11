@@ -215,23 +215,21 @@ export class WidgetGauge extends LitElement {
         this.dataSets = []
         this.inputData.dataseries?.forEach((ds) => {
             // pivot data
-            const distincts = [...new Set(ds?.data?.map((d: Data) => d.pivot))].filter((d) => d)
-            if (distincts.length > 0) {
-                distincts.forEach((piv) => {
-                    const pds: any = {
-                        label: `${piv ?? ''}-${ds.label ?? ''}`,
-                        unit: ds.unit,
-                        averageLatest: ds.averageLatest,
-                        valueColor: ds.valueColor,
-                        sections: ds.sections,
-                        backgroundColors: ds.backgroundColors,
-                        data: ds?.data?.filter((d) => d.pivot === piv)
-                    }
-                    this.dataSets.push(pds)
-                })
-            } else {
-                this.dataSets.push(ds)
-            }
+            const distincts = [...new Set(ds?.data?.map((d: Data) => d.pivot))]
+
+            distincts.forEach((piv) => {
+                const prefix = piv ? `${piv} - ` : ''
+                const pds: any = {
+                    label: prefix + `${ds.label ?? ''}`,
+                    unit: ds.unit,
+                    averageLatest: ds.averageLatest,
+                    valueColor: ds.valueColor,
+                    sections: ds.sections,
+                    backgroundColors: ds.backgroundColors,
+                    data: distincts.length === 1 ? ds.data : ds?.data?.filter((d) => d.pivot === piv)
+                }
+                this.dataSets.push(pds)
+            })
         })
 
         // console.log('Gauge Datasets', this.dataSets)
