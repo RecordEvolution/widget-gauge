@@ -24,7 +24,7 @@ export class WidgetGauge extends LitElement {
     boxes?: HTMLDivElement[]
     origWidth: number = 0
     origHeight: number = 0
-    template: EChartsOption
+    template: any
     modifier: number = 1
     version: string = 'versionplaceholder'
     constructor() {
@@ -67,8 +67,7 @@ export class WidgetGauge extends LitElement {
                         valueAnimation: false,
                         fontSize: 25,
                         offsetCenter: [0, '-7%'],
-                        color: 'inherit',
-                        formatter: (val) => (isNaN(val) ? '-' : val.toFixed())
+                        color: 'inherit'
                     },
                     title: {
                         offsetCenter: [0, '-35%'],
@@ -109,7 +108,7 @@ export class WidgetGauge extends LitElement {
                     },
                     axisLabel: {
                         distance: -20,
-                        color: '#999',
+                        color: '#666',
                         rotate: 'tangential',
                         fontSize: 12
                     }
@@ -260,13 +259,13 @@ export class WidgetGauge extends LitElement {
             ds.ranges = ds.sections?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
 
             // const option = this.canvasList[ds.label].getOption()
-            const option = JSON.parse(JSON.stringify(this.template))
+            const option = structuredClone(this.template)
             const ga = option.series[0],
                 ga2 = option.series[1]
 
             // Title
             option.title.text = ds.label
-            option.title.textStyle.fontSize = 22 * modifier
+            option.title.textStyle.fontSize = 32 * modifier
 
             // Needle
             // Check age of data Latency
@@ -278,10 +277,10 @@ export class WidgetGauge extends LitElement {
 
             ga.data[0].value = ds.needleValue
             ga.data[0].name = ds.unit
-            ga.title.fontSize = 20 * modifier
+            ga.title.fontSize = 32 * modifier
             ga.title.color = ds.valueColor ?? 'black'
             ga.detail.color = ds.valueColor ?? 'black'
-            ga.detail.fontSize = 40 * modifier
+            ga.detail.fontSize = 60 * modifier
             ga.detail.formatter = (val: number) => (isNaN(val) ? '-' : val.toFixed(0))
             // ga.anchor.itemStyle.color = ds.valueColor
             // ga.pointer.itemStyle.color = ds.valueColor
@@ -332,7 +331,7 @@ export class WidgetGauge extends LitElement {
             if (!canvas) return
             // @ts-ignore
             this.canvasList[ds.label ?? ''] = echarts.init(canvas)
-            this.canvasList[ds.label ?? ''].setOption(JSON.parse(JSON.stringify(this.template)))
+            this.canvasList[ds.label ?? ''].setOption(structuredClone(this.template))
         })
     }
 
