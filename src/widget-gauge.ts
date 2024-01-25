@@ -269,7 +269,7 @@ export class WidgetGauge extends LitElement {
 
             // Needle
             // Check age of data Latency
-            const tsp = Date.parse(ds.data?.[0].tsp ?? '')
+            const tsp = Date.parse(ds.data?.[0]?.tsp ?? '')
             if (isNaN(tsp)) {
                 const now = new Date().getTime()
                 if (now - tsp > (ds.maxLatency ?? Infinity) * 1000) ds.needleValue = undefined
