@@ -20,7 +20,7 @@ export class WidgetGauge extends LitElement {
     @state()
     private canvasList: any = {}
 
-    resizeObserver: ResizeObserver
+    private resizeObserver: ResizeObserver
     boxes?: HTMLDivElement[]
     origWidth: number = 0
     origHeight: number = 0
@@ -114,6 +114,13 @@ export class WidgetGauge extends LitElement {
                     }
                 } as GaugeSeriesOption
             ]
+        }
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback()
+        if(this.resizeObserver) {
+            this.resizeObserver.disconnect()
         }
     }
 
