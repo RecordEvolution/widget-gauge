@@ -27,6 +27,7 @@ export class WidgetGauge extends LitElement {
     template: any
     modifier: number = 1
     version: string = 'versionplaceholder'
+    gaugeContainer: HTMLDivElement | null | undefined
     constructor() {
         super()
         this.resizeObserver = new ResizeObserver(this.adjustSizes.bind(this))
@@ -119,14 +120,14 @@ export class WidgetGauge extends LitElement {
 
     disconnectedCallback() {
         super.disconnectedCallback()
-        if(this.resizeObserver) {
+        if (this.resizeObserver) {
             this.resizeObserver.disconnect()
         }
     }
 
     update(changedProperties: Map<string, any>) {
         changedProperties.forEach((oldValue, propName) => {
-            if (propName === 'inputData') {
+            if (propName === 'inputData' && this.gaugeContainer) {
                 this.transformData()
                 this.adjustSizes()
             }
@@ -137,7 +138,8 @@ export class WidgetGauge extends LitElement {
 
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
         this.resizeObserver.observe(this.shadowRoot?.querySelector('.wrapper') as HTMLDivElement)
-
+        this.gaugeContainer = this.shadowRoot?.querySelector('.gauge-container')
+        console.log('First Updated', this.gaugeContainer)
         this.sizingSetup()
         this.transformData()
         this.adjustSizes()
@@ -158,10 +160,9 @@ export class WidgetGauge extends LitElement {
 
     adjustSizes() {
         // if (!this.origHeight) return
-        const container = this.shadowRoot?.querySelector('.gauge-container') as HTMLDivElement
-        if (!container) return
-        const userWidth = container.getBoundingClientRect().width
-        const userHeight = container.getBoundingClientRect().height
+        if (!this.gaugeContainer) return
+        const userWidth = this.gaugeContainer.getBoundingClientRect().width
+        const userHeight = this.gaugeContainer.getBoundingClientRect().height
         const count = this.dataSets.length
 
         const width = this.origWidth
@@ -228,22 +229,26 @@ export class WidgetGauge extends LitElement {
                 const pds: any = {
                     label: prefix + `${ds.label ?? ''}`,
                     unit: ds.unit,
-                    averageLatest: ds.averageLatest,
+                    advanced: ds.advanced,
                     valueColor: ds.valueColor,
                     sections: ds.sections,
-                    backgroundColors: ds.backgroundColors,
                     data: distincts.length === 1 ? ds.data : ds?.data?.filter((d) => d.pivot === piv)
                 }
                 this.dataSets.push(pds)
             })
         })
 
-        // console.log('Gauge Datasets', this.dataSets)
+        this.setupCharts()
+
+        console.log('Gauge Datasets', this.dataSets)
     }
 
     applyData() {
+        console.log(
+            'Apply Data',
+            this.dataSets.map((d) => d.label)
+        )
         const modifier = this.modifier
-        this.setupCharts()
         this.dataSets.forEach((d) => {
             d.label ??= ''
         })
@@ -254,16 +259,20 @@ export class WidgetGauge extends LitElement {
         for (const ds of this.dataSets) {
             // compute derivative values
             // filter latest values and calculate average
-            if (typeof ds.averageLatest !== 'number' || !isNaN(ds.averageLatest)) ds.averageLatest = 1
-            const data = ds?.data?.slice(0, ds.averageLatest ?? 1) ?? []
+            ds.advanced ??= {}
+            if (typeof ds.advanced?.averageLatest !== 'number' || isNaN(ds.advanced?.averageLatest))
+                ds.advanced.averageLatest = 1
+            const data = ds?.data?.slice(0, ds.advanced?.averageLatest || 1) ?? []
             const values = (data?.map((d) => d.value)?.filter((p) => p !== undefined) ?? []) as number[]
             const average = values.reduce((p, c) => p + c, 0) / values.length
 
-            ds.needleValue = isNaN(average) ? ds.sections?.[0] : average
+            ds.needleValue = isNaN(average) ? ds.sections?.sectionLimits?.[0] : average
 
-            ds.range = (ds.sections?.[ds.sections?.length - 1] ?? 100) - (ds.sections?.[0] ?? 0)
+            ds.range =
+                (ds.sections?.sectionLimits?.[ds.sections?.sectionLimits?.length - 1] ?? 100) -
+                (ds.sections?.sectionLimits?.[0] ?? 0)
             if (isNaN(ds.range as number)) ds.range = 100
-            ds.ranges = ds.sections?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
+            ds.ranges = ds.sections?.sectionLimits?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
 
             // const option = this.canvasList[ds.label].getOption()
             const option = structuredClone(this.template)
@@ -279,7 +288,7 @@ export class WidgetGauge extends LitElement {
             const tsp = Date.parse(ds?.data?.[0]?.tsp ?? '')
             if (isNaN(tsp)) {
                 const now = new Date().getTime()
-                if (now - tsp > (ds.maxLatency ?? Infinity) * 1000) ds.needleValue = undefined
+                if (now - tsp > (ds.advanced?.maxLatency ?? Infinity) * 1000) ds.needleValue = undefined
             }
 
             ga.data[0].value = ds.needleValue
@@ -293,12 +302,15 @@ export class WidgetGauge extends LitElement {
             // ga.pointer.itemStyle.color = ds.valueColor
 
             // Axis
-            ga2.min = ds.sections?.length ? Math.min(...ds.sections) : 0
-            ga2.max = ds.sections?.length ? Math.max(...ds.sections) : 100
+            ga2.min = ds.sections?.sectionLimits?.length ? Math.min(...ds.sections?.sectionLimits) : 0
+            ga2.max = ds.sections?.sectionLimits?.length ? Math.max(...ds.sections?.sectionLimits) : 100
             ga.min = ga2.min
             ga.max = ga2.max
-            const colorSections = ds.backgroundColors
-                ?.map((b, i) => [((ds.sections?.[i + 1] ?? ga.min) - ga.min) / (ds.range as number), b])
+            const colorSections = ds.sections?.backgroundColors
+                ?.map((b, i) => [
+                    ((ds.sections?.sectionLimits?.[i + 1] ?? ga.min) - ga.min) / (ds.range as number),
+                    b
+                ])
                 .filter(([s]) => !isNaN(s as number))
             ga2.axisLine.lineStyle.width = 8 * modifier
             ga2.axisLine.lineStyle.color = colorSections?.length
@@ -311,35 +323,54 @@ export class WidgetGauge extends LitElement {
             ga2.splitLine.distance = -16 * modifier
 
             // Progress
-            let progressColor = ds.backgroundColors?.[ds.backgroundColors.length - 1] ?? 'green'
-            for (const [i, s] of ds.sections?.entries() ?? []) {
+            let progressColor =
+                ds.sections?.backgroundColors?.[ds.sections?.backgroundColors.length - 1] ?? 'green'
+            for (const [i, s] of ds.sections?.sectionLimits?.entries() ?? []) {
                 if (s > (ds.needleValue as number)) {
-                    progressColor = ds.backgroundColors?.[i - 1] ?? ds.backgroundColors?.[0] ?? 'green'
+                    progressColor =
+                        ds.sections?.backgroundColors?.[i - 1] ??
+                        ds.sections?.backgroundColors?.[0] ??
+                        'green'
                     break
                 }
             }
             ga.progress.itemStyle.color = progressColor
             ga.progress.width = 80 * modifier
             // Apply
+            console.log('Set Option', ds.label, option)
             this.canvasList[ds.label ?? '']?.setOption(option)
         }
     }
 
     setupCharts() {
         // remove the gauge canvases of non provided data series
+        console.log('Setup Charts', this.canvasList, this.dataSets)
         for (const label in this.canvasList) {
             const ex = this.dataSets.find((ds) => ds.label === label)
-            if (!ex) delete this.canvasList[label]
+            if (!ex) {
+                delete this.canvasList[label]
+                const containerDiv = this.gaugeContainer?.querySelector(`[name="${label}"]`)
+                containerDiv?.remove()
+            }
         }
 
         this.dataSets.forEach((ds) => {
             if (this.canvasList[ds.label ?? '']) return
-            const canvas = this.shadowRoot?.querySelector(`[name="${ds.label}"]`) as HTMLCanvasElement
-            if (!canvas) return
+            const newCanvas = document.createElement('div')
+            newCanvas.setAttribute('name', ds.label ?? '')
+            newCanvas.setAttribute('class', 'chart')
+            newCanvas.setAttribute(
+                'style',
+                `min-width: 600px; min-height: 400px; width: 600px; height: 400px;`
+            )
+
+            this.gaugeContainer!.appendChild(newCanvas)
+            console.log('Create Chart', ds.label)
             // @ts-ignore
-            this.canvasList[ds.label ?? ''] = echarts.init(canvas)
+            this.canvasList[ds.label ?? ''] = echarts.init(newCanvas)
             this.canvasList[ds.label ?? ''].setOption(structuredClone(this.template))
         })
+        this.sizingSetup()
     }
 
     static styles = css`
@@ -408,30 +439,11 @@ export class WidgetGauge extends LitElement {
     render() {
         return html`
             <div class="wrapper">
-                <header
-                    class="paging"
-                    ?active=${this.inputData?.settings?.title || this.inputData?.settings?.subTitle}
-                >
-                    <h3 class="paging" ?active=${this.inputData?.settings?.title}>
-                        ${this.inputData?.settings?.title}
-                    </h3>
-                    <p class="paging" ?active=${this.inputData?.settings?.subTitle}>
-                        ${this.inputData?.settings?.subTitle}
-                    </p>
+                <header class="paging" ?active=${this.inputData?.title || this.inputData?.subTitle}>
+                    <h3 class="paging" ?active=${this.inputData?.title}>${this.inputData?.title}</h3>
+                    <p class="paging" ?active=${this.inputData?.subTitle}>${this.inputData?.subTitle}</p>
                 </header>
-                <div class="gauge-container">
-                    ${repeat(
-                        this.dataSets,
-                        (ds) => ds.label,
-                        (ds) => html`
-                            <div
-                                name="${ds.label ?? ''}"
-                                class="chart"
-                                style="min-width: 600px; min-height: 400px; width: 600px; height: 400px;"
-                            ></div>
-                        `
-                    )}
-                </div>
+                <div class="gauge-container"></div>
             </div>
         `
     }

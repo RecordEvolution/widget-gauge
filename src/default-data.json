@@ -5,21 +5,23 @@
             "label": "Demo Gauge Temperature",
             "unit": "°C",
             "valueColor": "black",
-            "sections": [-20, 80, 90, 120],
-            "backgroundColors": ["#AAC8A7", "#F1C27B", "#FF9B9B"],
-            "averageLatest": 1,
             "data": [
                 {
-                    "value": 90,
-                    "pivot": "Frankfurt"
+                    "value": 90
                 }
-            ]
+            ],
+            "sections": {
+                "sectionLimits": [-20, 80, 90, 120],
+                "backgroundColors": ["#AAC8A7", "#F1C27B", "#FF9B9B"]
+            },
+            "advanced": {
+                "averageLatest": 1
+            }
         },
         {
             "label": "Demo Gauge Pascal",
             "unit": "Pa",
             "valueColor": "green",
-            "averageLatest": 1,
             "data": [
                 {
                     "value": 79

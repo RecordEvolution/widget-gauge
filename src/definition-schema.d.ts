@@ -13,9 +13,27 @@ export type Label = string;
  */
 export type Unit = string;
 /**
- * The amount of gauge sections. Starting from the min value, ending with the max value.
+ * This should be an ISO String date like 2023-11-04T22:47:52.351152+00:00. Will only be used to detect data age of data.
  */
-export type Sections = number[];
+export type Timestamp = string;
+export type Value = number;
+/**
+ * You can specify a table column to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as pivot column, then you will get a gauge for each city.
+ */
+export type PivotColumn = string;
+/**
+ * The data used to draw this gauge.
+ */
+export type Data = {
+  tsp?: Timestamp;
+  value?: Value;
+  pivot?: PivotColumn;
+  [k: string]: unknown;
+}[];
+/**
+ * The limits of the gauge sections. Starting from the min value, ending with the max value.
+ */
+export type SectionLimits = number[];
 /**
  * Background color for each section. This Array is one shorter than the number of sections.
  */
@@ -30,46 +48,32 @@ export type AverageLatestValues = number;
  * If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.
  */
 export type MaximumLatency = number;
-/**
- * This should be an ISO String date like 2023-11-04T22:47:52.351152+00:00. Will only be used to detect data age of data.
- */
-export type Timestamp = string;
-export type Value = number;
-/**
- * You can specify a column in the input data to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as pivot column, then you will get a gauge for each city.
- */
-export type PivotColumn = string;
-/**
- * The data used to draw this data series.
- */
-export type Data = {
-  tsp?: Timestamp;
-  value?: Value;
-  pivot?: PivotColumn;
-  [k: string]: unknown;
-}[];
 export type Gauges = {
   label?: Label;
   valueColor?: ValueColor;
   unit?: Unit;
-  sections?: Sections;
-  backgroundColors?: SectionBackgroundColors;
-  averageLatest?: AverageLatestValues;
-  maxLatency?: MaximumLatency;
   data?: Data;
+  sections?: SectionsConfiguration;
+  advanced?: AdvancedConfiguration;
   [k: string]: unknown;
 }[];
 
 export interface GaugeChartConfiguration {
-  settings?: GlobalSettings;
+  title?: Title;
+  subTitle?: Subtitle;
   dataseries?: Gauges;
   [k: string]: unknown;
 }
-export interface GlobalSettings {
-  title?: Title;
-  subTitle?: Subtitle;
+export interface ValueColor {
   [k: string]: unknown;
 }
-export interface ValueColor {
+export interface SectionsConfiguration {
+  sectionLimits?: SectionLimits;
+  backgroundColors?: SectionBackgroundColors;
+  [k: string]: unknown;
+}
+export interface AdvancedConfiguration {
+  averageLatest?: AverageLatestValues;
+  maxLatency?: MaximumLatency;
   [k: string]: unknown;
 }

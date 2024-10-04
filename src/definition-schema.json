@@ -2,22 +2,15 @@
     "title": "Gauge-chart Configuration",
     "type": "object",
     "properties": {
-        "settings": {
-            "title": "Global Settings",
-            "type": "object",
-            "order": 1,
-            "properties": {
-                "title": {
-                    "title": "Title",
-                    "type": "string",
-                    "order": 1
-                },
-                "subTitle": {
-                    "title": "Subtitle",
-                    "type": "string",
-                    "order": 2
-                }
-            }
+        "title": {
+            "title": "Title",
+            "type": "string",
+            "order": 1
+        },
+        "subTitle": {
+            "title": "Subtitle",
+            "type": "string",
+            "order": 2
         },
         "dataseries": {
             "title": "Gauges",
@@ -43,42 +36,11 @@
                         "type": "string",
                         "order": 3
                     },
-                    "sections": {
-                        "title": "Sections",
-                        "description": "The amount of gauge sections. Starting from the min value, ending with the max value.",
-                        "type": "array",
-                        "order": 4,
-                        "items": {
-                            "type": "number"
-                        }
-                    },
-                    "backgroundColors": {
-                        "title": "Section background colors",
-                        "description": "Background color for each section. This Array is one shorter than the number of sections.",
-                        "type": "array",
-                        "items": {
-                            "type": "color"
-                        },
-                        "order": 5
-                    },
-                    "averageLatest": {
-                        "title": "Average Latest Values",
-                        "description": "Calculate the average over the given number of newest values. (If pivoted, then per each of the pivot dataseries.) If not specified then the latest value is shown without modification.",
-                        "type": "number",
-                        "order": 6
-                    },
-                    "maxLatency": {
-                        "title": "Maximum Latency",
-                        "description": "If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.",
-                        "type": "number",
-                        "order": 7
-                    },
                     "data": {
                         "title": "Data",
-                        "description": "The data used to draw this data series.",
+                        "description": "The data used to draw this gauge.",
                         "type": "array",
-                        "order": 8,
-                        "buffersize": 1000,
+                        "order": 4,
                         "items": {
                             "type": "object",
                             "properties": {
@@ -100,6 +62,52 @@
                                     "order": 3,
                                     "type": "string"
                                 }
+                            }
+                        }
+                    },
+                    "sections": {
+                        "title": "Sections Configuration",
+                        "description": "",
+                        "type": "object",
+                        "order": 5,
+                        "properties": {
+                            "sectionLimits": {
+                                "title": "Section Limits",
+                                "description": "The limits of the gauge sections. Starting from the min value, ending with the max value.",
+                                "type": "array",
+                                "order": 4,
+                                "items": {
+                                    "type": "number"
+                                }
+                            },
+                            "backgroundColors": {
+                                "title": "Section background colors",
+                                "description": "Background color for each section. This Array is one shorter than the number of sections.",
+                                "type": "array",
+                                "items": {
+                                    "type": "color"
+                                },
+                                "order": 5
+                            }
+                        }
+                    },
+                    "advanced": {
+                        "title": "Advanced Configuration",
+                        "description": "",
+                        "type": "object",
+                        "order": 6,
+                        "properties": {
+                            "averageLatest": {
+                                "title": "Average Latest Values",
+                                "description": "Calculate the average over the given number of newest values. (If pivoted, then per each of the pivot dataseries.) If not specified then the latest value is shown without modification.",
+                                "type": "number",
+                                "order": 6
+                            },
+                            "maxLatency": {
+                                "title": "Maximum Latency",
+                                "description": "If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.",
+                                "type": "number",
+                                "order": 7
                             }
                         }
                     }

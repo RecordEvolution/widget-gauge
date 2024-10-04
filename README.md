@@ -6,7 +6,8 @@
 </div>
 <br>
 
-# The usage 
+# The usage
+
 ## Installation & Usage
 
 ```bash
@@ -15,12 +16,11 @@ npm i widget-gauge
 
 ```html
 <script type="module">
-  import 'widget-gauge';
+    import 'widget-gauge'
 </script>
 
-<widget-gauge inputData="gauge-definition-schema"></widget-gauge>
+<widget-gauge inputData="default-data"></widget-gauge>
 ```
-
 
 ## Development
 
@@ -57,7 +57,19 @@ This replaces the already imported widget-gauge package with your local widget-g
 <br>
 <br>
 
+## Releasing a new version
+
+To release a new version of the widget adjust the version string in the package.json
+Then run
+
+```js
+npm run types
+npm run build
+npm run release
+```
+
 # About Widgets
+
 ## Overview
 
 The Gauge-Widget is part of the widget series for the IoT dashboard builder. While the Record Evolution platform provides various IoT functionalities, building Dashboards is one of them. As of now, around 10 widgets are available for usage and each widget is publicly accessible on Github.
@@ -74,7 +86,6 @@ The main files in the repository that describe and provide your widget with data
 
 The definition-schema describes the data structure your widget code will consume. Once the widget is released to our platform the [JSON schema](https://json-schema.org/learn/getting-started-step-by-step) will be rendered into an input form and therefore significantly reduces complexity for the user when mapping data according to the definition schema. While our schema relies on the JSON schema standard we provided some extra features to simplify things. This includes the sorting of input fields with the order value.
 Extra data types for colors and enum fields in order to render color picker and dropdown elements.And the buffersize to regulate the interval data is requested in.
-
 
 ```json
 {
@@ -110,7 +121,6 @@ Extra data types for colors and enum fields in order to render color picker and 
                         "description": "The data used to draw this data series.",
                         "type": "array",
                         "order": 4,
-                        "buffersize": 100,
                         "items": {
                             "type": "object",
                             "properties": {
@@ -137,10 +147,11 @@ Extra data types for colors and enum fields in order to render color picker and 
 ### default-data.json
 
 As the file name already describes the default-data provides some fallback data that follows the given definition structure. The following format represents the data according to the provided definition-schema shown above:
+
 ```json
 {
     "settings": {
-      "title": "New widget"
+        "title": "New widget"
     },
     "dataseries": [
         {
@@ -162,8 +173,4 @@ As the file name already describes the default-data provides some fallback data 
         }
     ]
 }
-
 ```
-
-
-
