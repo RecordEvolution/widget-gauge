@@ -59,14 +59,17 @@ This replaces the already imported widget-gauge package with your local widget-g
 
 ## Releasing a new version
 
-To release a new version of the widget adjust the version string in the package.json
-Then run
+To release a new version of the widget commit all your changes and run
 
 ```js
 npm run types
 npm run build
 npm run release
 ```
+
+Note that `npm run release` automatically increases the path version number. If you want a minor update, then either adjuste the version in the package.json manually or use `minor` instead of `patch` in the `npm run release` command.
+
+After the version tag has been successfully published to github, our github action kicks in and creates a release on github and publishes the release on npm as well.
 
 # About Widgets
 
