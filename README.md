@@ -71,6 +71,14 @@ Note that `npm run release` automatically increases the path version number. If 
 
 After the version tag has been successfully published to github, our github action kicks in and creates a release on github and publishes the release on npm as well.
 
+Now you need to tell the IronFlock system that a new version of the widget should be offered. You do this by executing with the new version string you created.
+
+```sql
+select swarm.f_update_widget_master('{"package_name": "widget-gauge", "version": "1.5.21"}'::jsonb);
+```
+
+To make it work locally you need to restart the node web server container.
+
 # About Widgets
 
 ## Overview
