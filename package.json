@@ -39,7 +39,7 @@
         "concurrently": "^9.0.1",
         "deepmerge": "^4.3.1",
         "es-dev-server": "^2.1.0",
-        "eslint": "^9.0.0",
+        "eslint": "^9.11.1",
         "eslint-config-prettier": "^9.1.0",
         "husky": "^9.1.6",
         "json-schema-to-typescript": "^15.0.2",
