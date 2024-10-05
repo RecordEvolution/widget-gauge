@@ -63,7 +63,6 @@ To release a new version of the widget commit all your changes and run
 
 ```js
 npm run types
-npm run build
 npm run release
 ```
 
@@ -77,7 +76,9 @@ Now you need to tell the IronFlock system that a new version of the widget shoul
 select swarm.f_update_widget_master('{"package_name": "widget-gauge", "version": "1.5.21"}'::jsonb);
 ```
 
-To make it work locally you need to restart the node web server container.
+To make it work locally you need to `npm run build` to get the correct version string in your build files locally, then restart the node web server container.
+
+> It the widget is part of the demo dashboard-template.yml, then also adjust the version numbers there!
 
 # About Widgets
 

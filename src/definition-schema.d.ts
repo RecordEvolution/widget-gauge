@@ -18,16 +18,16 @@ export type Unit = string;
 export type Timestamp = string;
 export type Value = number;
 /**
- * You can specify a table column to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as pivot column, then you will get a gauge for each city.
+ * You can specify a table column to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as split column, then you will get a gauge for each city.
  */
-export type PivotColumn = string;
+export type SplitDataBy = string;
 /**
  * The data used to draw this gauge.
  */
 export type Data = {
   tsp?: Timestamp;
   value?: Value;
-  pivot?: PivotColumn;
+  pivot?: SplitDataBy;
   [k: string]: unknown;
 }[];
 /**
