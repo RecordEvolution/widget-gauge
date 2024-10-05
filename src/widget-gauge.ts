@@ -139,7 +139,6 @@ export class WidgetGauge extends LitElement {
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
         this.resizeObserver.observe(this.shadowRoot?.querySelector('.wrapper') as HTMLDivElement)
         this.gaugeContainer = this.shadowRoot?.querySelector('.gauge-container')
-        console.log('First Updated', this.gaugeContainer)
         this.sizingSetup()
         this.transformData()
         this.adjustSizes()
@@ -154,8 +153,6 @@ export class WidgetGauge extends LitElement {
             this.boxes?.map((b) => b.getBoundingClientRect().width).reduce((p, c) => (c > p ? c : p), 0) ?? 0
         this.origHeight =
             this.boxes?.map((b) => b.getBoundingClientRect().height).reduce((p, c) => (c > p ? c : p), 0) ?? 0
-
-        console.log('OrigWidth', this.origWidth, this.origHeight)
     }
 
     adjustSizes() {
@@ -239,15 +236,9 @@ export class WidgetGauge extends LitElement {
         })
 
         this.setupCharts()
-
-        console.log('Gauge Datasets', this.dataSets)
     }
 
     applyData() {
-        console.log(
-            'Apply Data',
-            this.dataSets.map((d) => d.label)
-        )
         const modifier = this.modifier
         this.dataSets.forEach((d) => {
             d.label ??= ''
@@ -337,14 +328,12 @@ export class WidgetGauge extends LitElement {
             ga.progress.itemStyle.color = progressColor
             ga.progress.width = 80 * modifier
             // Apply
-            console.log('Set Option', ds.label, option)
             this.canvasList[ds.label ?? '']?.setOption(option)
         }
     }
 
     setupCharts() {
         // remove the gauge canvases of non provided data series
-        console.log('Setup Charts', this.canvasList, this.dataSets)
         for (const label in this.canvasList) {
             const ex = this.dataSets.find((ds) => ds.label === label)
             if (!ex) {
@@ -365,7 +354,6 @@ export class WidgetGauge extends LitElement {
             )
 
             this.gaugeContainer!.appendChild(newCanvas)
-            console.log('Create Chart', ds.label)
             // @ts-ignore
             this.canvasList[ds.label ?? ''] = echarts.init(newCanvas)
             this.canvasList[ds.label ?? ''].setOption(structuredClone(this.template))

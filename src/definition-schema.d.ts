@@ -41,7 +41,7 @@ export type SectionBackgroundColors = {
   [k: string]: unknown;
 }[];
 /**
- * Calculate the average over the given number of newest values. (If pivoted, then per each of the pivot dataseries.) If not specified then the latest value is shown without modification.
+ * Calculate the average over the given number of newest values. (If you use 'split by', then per each of the split dataseries.) If not specified then the latest value is shown without modification.
  */
 export type AverageLatestValues = number;
 /**
@@ -53,7 +53,7 @@ export type Gauges = {
   valueColor?: ValueColor;
   unit?: Unit;
   data?: Data;
-  sections?: SectionsConfiguration;
+  sections?: GaugeColorSections;
   advanced?: AdvancedConfiguration;
   [k: string]: unknown;
 }[];
@@ -67,7 +67,7 @@ export interface GaugeChartConfiguration {
 export interface ValueColor {
   [k: string]: unknown;
 }
-export interface SectionsConfiguration {
+export interface GaugeColorSections {
   sectionLimits?: SectionLimits;
   backgroundColors?: SectionBackgroundColors;
   [k: string]: unknown;

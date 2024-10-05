@@ -66,7 +66,7 @@
                         }
                     },
                     "sections": {
-                        "title": "Sections Configuration",
+                        "title": "Gauge Color Sections",
                         "description": "",
                         "type": "object",
                         "order": 5,
@@ -99,7 +99,7 @@
                         "properties": {
                             "averageLatest": {
                                 "title": "Average Latest Values",
-                                "description": "Calculate the average over the given number of newest values. (If pivoted, then per each of the pivot dataseries.) If not specified then the latest value is shown without modification.",
+                                "description": "Calculate the average over the given number of newest values. (If you use 'split by', then per each of the split dataseries.) If not specified then the latest value is shown without modification.",
                                 "type": "number",
                                 "order": 6
                             },
