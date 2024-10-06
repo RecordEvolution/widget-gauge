@@ -1,7 +1,6 @@
 import { html, css, LitElement, PropertyValueMap } from 'lit'
-import { repeat } from 'lit/directives/repeat.js'
 import { property, state } from 'lit/decorators.js'
-// import * as echarts from "echarts";
+// import * as echarts from 'echarts'
 import type { EChartsOption, GaugeSeriesOption } from 'echarts'
 import { GaugeChartConfiguration } from './definition-schema.js'
 

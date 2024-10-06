@@ -23,15 +23,17 @@
         <div id="demo"></div>
         <script src="https://storage.googleapis.com/reswarm-images/ObjectRandomizer.js"></script>
         <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"
-            integrity="sha512-EmNxF3E6bM0Xg1zvmkeYD3HDBeGxtsG92IxFt1myNZhXdCav9MzvuH/zNMBU1DmIPN6njrhX1VTbqdJxQ2wHDg=="
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"
+            integrity="sha512-k37wQcV4v2h6jgYf5IUz1MoSKPpDs630XGSmCaCCOXxy2awgAWKHGZWr9nMyGgk3IOxA1NxdkN8r1JHgkUtMoQ=="
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
         ></script>
+
         <script type="module">
             import { html, render } from 'lit'
             import '../dist/src/widget-gauge.js'
-            import data from '../src/default-data.json' assert { type: 'json' }
+            const response = await fetch('../src/default-data.json')
+            const data = await response.json()
 
             const keyPathsToRandomize = ['dataseries.0.data.0.value', 'settings.title']
             const inter = setInterval(() => {
