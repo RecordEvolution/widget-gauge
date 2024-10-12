@@ -35,11 +35,12 @@
                         "title": "Unit",
                         "description": "The unit of the values. e.g. °C or km/h",
                         "type": "string",
+                        "dataDrivenDisabled": true,
                         "order": 3
                     },
                     "data": {
                         "title": "Data",
-                        "description": "The data used to draw this gauge.",
+                        "description": "Provide a list of values. Only the latest value is shown in the gauge unless you configure \"Advanced Settings\" below or use split Data.",
                         "type": "array",
                         "order": 4,
                         "items": {
@@ -76,17 +77,21 @@
                                 "title": "Section Limits",
                                 "description": "The limits of the gauge sections. Starting from the min value, ending with the max value.",
                                 "type": "array",
+                                "dataDrivenDisabled": true,
                                 "order": 4,
                                 "items": {
-                                    "type": "number"
+                                    "type": "number",
+                                    "dataDrivenDisabled": true
                                 }
                             },
                             "backgroundColors": {
                                 "title": "Section background colors",
                                 "description": "Background color for each section. This Array is one shorter than the number of sections.",
                                 "type": "array",
+                                "dataDrivenDisabled": true,
                                 "items": {
-                                    "type": "color"
+                                    "type": "color",
+                                    "dataDrivenDisabled": true
                                 },
                                 "order": 5
                             }
@@ -102,12 +107,14 @@
                                 "title": "Average Latest Values",
                                 "description": "Calculate the average over the given number of newest values. (If you use 'split by', then per each of the split dataseries.) If not specified then the latest value is shown without modification.",
                                 "type": "number",
+                                "dataDrivenDisabled": true,
                                 "order": 6
                             },
                             "maxLatency": {
                                 "title": "Maximum Latency",
                                 "description": "If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.",
                                 "type": "number",
+                                "dataDrivenDisabled": true,
                                 "order": 7
                             }
                         }
