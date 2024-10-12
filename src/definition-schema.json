@@ -15,6 +15,7 @@
         "dataseries": {
             "title": "Gauges",
             "type": "array",
+            "dataDrivenDisabled": true,
             "order": 2,
             "items": {
                 "type": "object",
