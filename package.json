@@ -16,8 +16,9 @@
         "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
         "build": "rollup -c rollup.config.js",
         "watch": "rollup -w -c rollup.config.js",
+        "link": "npm link && cd ../RESWARM/frontend && npm link @record-evolution/widget-linechart",
+        "unlink": "npm unlink --global && cd ../RESWARM/frontend && npm unlink @record-evolution/widget-linechart && npm i @record-evolution/widget-linechart",
         "types": "cat src/definition-schema.json | json2ts > src/definition-schema.d.ts",
-        "start:build": "npm run build && es-dev-server --root-dir dist --app-index index.html --compatibility none --open",
         "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
         "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
         "release": "npm version patch --tag-version-prefix='' && git push && git push --tag"

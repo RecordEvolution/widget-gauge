@@ -40,7 +40,7 @@
                     },
                     "data": {
                         "title": "Data",
-                        "description": "Provide a list of values. Only the latest value is shown in the gauge unless you configure \"Advanced Settings\" below or use split Data.",
+                        "description": "Provide a list of values. Only the latest value is shown in the gauge unless you configure \"Advanced Settings\" below or use split data.",
                         "type": "array",
                         "order": 4,
                         "items": {

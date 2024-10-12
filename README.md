@@ -38,21 +38,19 @@ If you want to use the widget inside another project X, then add the widget as n
 npm i widget-gauge
 ```
 
-To avoid releasing the widget-gauge on every change and updating the node_modules in X you can "link" the package locally.
+To avoid releasing the widget-gauge on every change and updating the node_modules in your project X you can "link" the package locally. This replaces the already imported widget-gauge package with your local widget-gauge git repo. Since this node module is linked all changes you make in your local widget-gauge repo will immediately be visible in project X.
 
 Go to your local widget-gauge git repo and do
 
 ```bash
-npm link
+npm run link
 ```
 
-This create a global symbolic link on your environment. Now go to your project X git folder and do
+This create a global symbolic link on your environment and links your local package into the project X folder. (You may need to adjust the project X folder in your package.json) To reinstall the original npm version of the widget do
 
 ```bash
-npm link widget-gauge
+npm run unlink
 ```
-
-This replaces the already imported widget-gauge package with your local widget-gauge git repo. Since this node module is linked all changes you make in your local widget-gauge repo will immediately be visible in project X.
 
 <br>
 <br>
