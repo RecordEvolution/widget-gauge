@@ -95,7 +95,7 @@ The main files in the repository that describe and provide your widget with data
 ### defenition-schema.json
 
 The definition-schema describes the data structure your widget code will consume. Once the widget is released to our platform the [JSON schema](https://json-schema.org/learn/getting-started-step-by-step) will be rendered into an input form and therefore significantly reduces complexity for the user when mapping data according to the definition schema. While our schema relies on the JSON schema standard we provided some extra features to simplify things. This includes the sorting of input fields with the order value.
-Extra data types for colors and enum fields in order to render color picker and dropdown elements.And the buffersize to regulate the interval data is requested in.
+Extra data types for colors and enum fields in order to render color picker and dropdown elements.
 
 ```json
 {

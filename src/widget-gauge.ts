@@ -252,7 +252,7 @@ export class WidgetGauge extends LitElement {
             ds.advanced ??= {}
             if (typeof ds.advanced?.averageLatest !== 'number' || isNaN(ds.advanced?.averageLatest))
                 ds.advanced.averageLatest = 1
-            const data = ds?.data?.slice(0, ds.advanced?.averageLatest || 1) ?? []
+            const data = ds?.data?.slice(-ds.advanced?.averageLatest || -1) ?? []
             const values = (data?.map((d) => d.value)?.filter((p) => p !== undefined) ?? []) as number[]
             const average = values.reduce((p, c) => p + c, 0) / values.length
 
@@ -421,6 +421,17 @@ export class WidgetGauge extends LitElement {
             width: 600px; /* will be overriden by adjustSizes */
             height: 400px;
         }
+
+        .no-data {
+            font-size: 20px;
+            color: var(--re-text-color, #000);
+            display: flex;
+            height: 100%;
+            width: 100%;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
     `
 
     render() {
@@ -430,6 +441,7 @@ export class WidgetGauge extends LitElement {
                     <h3 class="paging" ?active=${this.inputData?.title}>${this.inputData?.title}</h3>
                     <p class="paging" ?active=${this.inputData?.subTitle}>${this.inputData?.subTitle}</p>
                 </header>
+                <div class="paging no-data" ?active=${!this.dataSets.length}>No Data</div>
                 <div class="gauge-container"></div>
             </div>
         `
