@@ -21,7 +21,7 @@
         "types": "cat src/definition-schema.json | json2ts > src/definition-schema.d.ts",
         "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
         "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
-        "release": "npm version patch --tag-version-prefix='' && git push && git push --tag"
+        "release": "npm run build && npm run types && npm version patch --tag-version-prefix='' && git push && git push --tag"
     },
     "dependencies": {
         "echarts": "5.6.0",
