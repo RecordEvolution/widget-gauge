@@ -1,17 +1,26 @@
 import { html, css, LitElement, PropertyValueMap } from 'lit'
-import { property, state } from 'lit/decorators.js'
-// import * as echarts from 'echarts'
-import type { EChartsOption, GaugeSeriesOption } from 'echarts'
+import { customElement, property, state } from 'lit/decorators.js'
 import { GaugeChartConfiguration } from './definition-schema.js'
 
-// echarts.use([GaugeChart, CanvasRenderer]);
+import * as echarts from 'echarts/core'
+import { TooltipComponent } from 'echarts/components'
+import { GaugeChart, GaugeSeriesOption } from 'echarts/charts'
+import { CanvasRenderer, SVGRenderer } from 'echarts/renderers'
+
+echarts.use([TooltipComponent, GaugeChart, CanvasRenderer])
+
+console.log('WidgetGauge loaded', echarts)
 
 type Dataseries = Exclude<GaugeChartConfiguration['dataseries'], undefined>[number]
 type Data = Exclude<Dataseries['data'], undefined>[number]
 
+@customElement('widget-gauge-versionplaceholder')
 export class WidgetGauge extends LitElement {
     @property({ type: Object })
     inputData?: GaugeChartConfiguration
+
+    @property({ type: String })
+    themeName?: string = 'light'
 
     @state()
     private dataSets: Dataseries[] = []
@@ -19,7 +28,14 @@ export class WidgetGauge extends LitElement {
     @state()
     private canvasList: any = {}
 
+    @state()
+    private themeBgColor: string = '#fff'
+
+    @state()
+    private themeColor: string = '#000'
+
     private resizeObserver: ResizeObserver
+
     boxes?: HTMLDivElement[]
     origWidth: number = 0
     origHeight: number = 0
@@ -27,6 +43,7 @@ export class WidgetGauge extends LitElement {
     modifier: number = 1
     version: string = 'versionplaceholder'
     gaugeContainer: HTMLDivElement | null | undefined
+
     constructor() {
         super()
         this.resizeObserver = new ResizeObserver(this.adjustSizes.bind(this))
@@ -46,7 +63,7 @@ export class WidgetGauge extends LitElement {
                     endAngle: 0,
                     min: 33,
                     max: 99,
-                    radius: '121%',
+                    radius: '140%',
                     center: ['50%', '90%'],
                     progress: {
                         show: true,
@@ -70,12 +87,15 @@ export class WidgetGauge extends LitElement {
                         color: 'inherit'
                     },
                     title: {
+                        text: 'Gauge A',
                         offsetCenter: [0, '-35%'],
-                        fontSize: 20
+                        fontSize: 20,
+                        show: true
                     },
                     data: [
                         {
-                            value: 70
+                            value: 70,
+                            name: 'nASDf'
                         }
                     ]
                 } as GaugeSeriesOption,
@@ -85,7 +105,7 @@ export class WidgetGauge extends LitElement {
                     endAngle: 0,
                     min: 33,
                     max: 99,
-                    radius: '125%',
+                    radius: '145%',
                     center: ['50%', '90%'],
                     axisLine: {
                         lineStyle: {
@@ -106,6 +126,12 @@ export class WidgetGauge extends LitElement {
                             color: 'auto'
                         }
                     },
+                    title: {
+                        text: 'Gauge B',
+                        offsetCenter: [0, '-35%'],
+                        fontSize: 20,
+                        show: false
+                    },
                     axisLabel: {
                         distance: -20,
                         color: '#666',
@@ -124,29 +150,30 @@ export class WidgetGauge extends LitElement {
         }
     }
 
-    update(changedProperties: Map<string, any>) {
-        changedProperties.forEach((oldValue, propName) => {
-            if (propName === 'inputData' && this.gaugeContainer) {
-                this.transformData()
-                this.adjustSizes()
-            }
-        })
+    update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+        if (changedProperties.has('inputData') && this.gaugeContainer) {
+            this.transformData()
+        }
 
+        if (changedProperties.has('themeName')) {
+            this.deleteCharts()
+            this.setupCharts()
+        }
         super.update(changedProperties)
     }
 
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
         this.resizeObserver.observe(this.shadowRoot?.querySelector('.wrapper') as HTMLDivElement)
         this.gaugeContainer = this.shadowRoot?.querySelector('.gauge-container')
-        this.sizingSetup()
         this.transformData()
-        this.adjustSizes()
     }
 
     sizingSetup() {
         if (this.origWidth !== 0 && this.origHeight !== 0) return
 
-        this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
+        this.boxes =
+            Array.from(this?.shadowRoot?.querySelectorAll('.chart-wrapper') as NodeListOf<HTMLDivElement>) ??
+            []
         if (!this.boxes.length) return
         this.origWidth =
             this.boxes?.map((b) => b.getBoundingClientRect().width).reduce((p, c) => (c > p ? c : p), 0) ?? 0
@@ -161,26 +188,26 @@ export class WidgetGauge extends LitElement {
         const userHeight = this.gaugeContainer.getBoundingClientRect().height
         const count = this.dataSets.length
 
-        const width = this.origWidth
-        const height = this.origHeight
-        if (!userHeight || !userWidth || !width || !height) return
+        const chartW = this.origWidth
+        const chartH = this.origHeight
+        if (!userHeight || !userWidth || !chartW || !chartH) return
         const fits = []
         for (let c = 1; c <= count; c++) {
             const r = Math.ceil(count / c)
-            const uwgap = userWidth - 12 * (c - 1)
-            const uhgap = userHeight - 12 * (r - 1)
-            const m = uwgap / width / c
-            const size = m * m * width * height * count
-            if (r * m * height <= uhgap) fits.push({ c, r, m, size, uwgap, uhgap })
+            const netWidth = userWidth - 24 * (c - 1) // subtract the gaps between the charts
+            const netHeight = userHeight - 24 * (r - 1)
+            const m = netWidth / chartW / c // modifying factor to make it fit
+            const size = m * m * chartW * chartH * count // screen space used by charts overall
+            if (r * m * chartH <= netHeight) fits.push({ c, r, m, size, uwgap: netWidth, uhgap: netHeight })
         }
 
         for (let r = 1; r <= count; r++) {
             const c = Math.ceil(count / r)
-            const uwgap = userWidth - 12 * (c - 1)
-            const uhgap = userHeight - 12 * (r - 1)
-            const m = uhgap / height / r
-            const size = m * m * width * height * count
-            if (c * m * width <= uwgap) fits.push({ c, r, m, size, uwgap, uhgap })
+            const netWidth = userWidth - 24 * (c - 1)
+            const netHeight = userHeight - 24 * (r - 1)
+            const m = netHeight / chartH / r
+            const size = m * m * chartW * chartH * count
+            if (c * m * chartW <= netWidth) fits.push({ c, r, m, size, uwgap: netWidth, uhgap: netHeight })
         }
 
         const maxSize = fits.reduce((p, c) => (c.size < p ? p : c.size), 0)
@@ -202,39 +229,45 @@ export class WidgetGauge extends LitElement {
         this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
 
         this.boxes?.forEach((box) =>
-            box.setAttribute('style', `width:${modifier * width}px; height:${modifier * height}px`)
+            box.setAttribute('style', `width:${modifier * chartW}px; height:${modifier * (chartH - 25)}px`)
         )
 
         this.modifier = modifier
 
         for (const canvas in this.canvasList) {
-            this.canvasList[canvas].resize()
+            this.canvasList[canvas].echart.resize()
         }
         this.applyData()
     }
 
     async transformData() {
-        if (!this?.inputData) return
+        // console.log('Transforming data', this.inputData?.dataseries)
         this.dataSets = []
-        this.inputData.dataseries?.forEach((ds) => {
-            // pivot data
-            const distincts = [...new Set(ds?.data?.map((d: Data) => d.pivot))]
+        if (!this?.inputData) return
+        this.inputData.dataseries
+            ?.sort((a, b) => ((a.label ?? '') > (b.label ?? '') ? 1 : -1))
+            .forEach((ds) => {
+                // pivot data
+                const distincts = [...new Set(ds?.data?.map((d: Data) => d.pivot))]
 
-            distincts.forEach((piv) => {
-                const prefix = piv ? `${piv} - ` : ''
-                const pds: any = {
-                    label: prefix + `${ds.label ?? ''}`,
-                    unit: ds.unit,
-                    advanced: ds.advanced,
-                    valueColor: ds.valueColor,
-                    sections: ds.sections,
-                    data: distincts.length === 1 ? ds.data : ds?.data?.filter((d) => d.pivot === piv)
-                }
-                this.dataSets.push(pds)
+                distincts.forEach((piv) => {
+                    const prefix = piv ?? ''
+                    const label = ds.label ?? ''
+                    const pds: any = {
+                        label: prefix + (!!prefix && !!label ? ' - ' : '') + label,
+                        unit: ds.unit,
+                        precision: ds.precision,
+                        advanced: ds.advanced,
+                        valueColor: ds.valueColor,
+                        sections: ds.sections,
+                        data: distincts.length === 1 ? ds.data : ds?.data?.filter((d) => d.pivot === piv)
+                    }
+                    this.dataSets.push(pds)
+                })
             })
-        })
 
         this.setupCharts()
+        this.adjustSizes()
     }
 
     applyData() {
@@ -265,13 +298,13 @@ export class WidgetGauge extends LitElement {
             ds.ranges = ds.sections?.sectionLimits?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
 
             // const option = this.canvasList[ds.label].getOption()
-            const option = structuredClone(this.template)
+            const option = window.structuredClone(this.template)
             const ga = option.series[0],
                 ga2 = option.series[1]
 
             // Title
             option.title.text = ds.label
-            option.title.textStyle.fontSize = 32 * modifier
+            option.title.textStyle.fontSize = 25 * modifier
 
             // Needle
             // Check age of data Latency
@@ -283,11 +316,12 @@ export class WidgetGauge extends LitElement {
 
             ga.data[0].value = ds.needleValue
             ga.data[0].name = ds.unit
-            ga.title.fontSize = 32 * modifier
-            ga.title.color = ds.valueColor ?? 'black'
-            ga.detail.color = ds.valueColor ?? 'black'
-            ga.detail.fontSize = 60 * modifier
-            ga.detail.formatter = (val: number) => (isNaN(val) ? '-' : val.toFixed(0))
+            ga.title.fontSize = 25 * modifier
+            ga.title.color = ds.valueColor ?? this.themeColor
+            ga.detail.color = ds.valueColor ?? this.themeColor
+            ga.detail.fontSize = 40 * modifier
+            ga.detail.formatter = (val: number) =>
+                isNaN(val) ? '-' : val.toFixed(Math.floor(ds.precision ?? 0))
             // ga.anchor.itemStyle.color = ds.valueColor
             // ga.pointer.itemStyle.color = ds.valueColor
 
@@ -313,21 +347,30 @@ export class WidgetGauge extends LitElement {
             ga2.splitLine.distance = -16 * modifier
 
             // Progress
-            let progressColor =
-                ds.sections?.backgroundColors?.[ds.sections?.backgroundColors.length - 1] ?? 'green'
+            let progressColor = ds.sections?.backgroundColors?.[ds.sections?.backgroundColors.length - 1]
             for (const [i, s] of ds.sections?.sectionLimits?.entries() ?? []) {
                 if (s > (ds.needleValue as number)) {
                     progressColor =
-                        ds.sections?.backgroundColors?.[i - 1] ??
-                        ds.sections?.backgroundColors?.[0] ??
-                        'green'
+                        ds.sections?.backgroundColors?.[i - 1] ?? ds.sections?.backgroundColors?.[0]
                     break
                 }
             }
             ga.progress.itemStyle.color = progressColor
-            ga.progress.width = 80 * modifier
+            ga.progress.width = 60 * modifier
             // Apply
-            this.canvasList[ds.label ?? '']?.setOption(option)
+            this.canvasList[ds.label ?? ''].title.style.fontSize = String(20 * modifier) + 'px'
+            this.canvasList[ds.label ?? ''].title.style.maxWidth = String(300 * modifier) + 'px'
+            this.canvasList[ds.label ?? ''].title.style.height = String(25 * modifier) + 'px'
+            console.log('Applying data to chart', this.canvasList[ds.label ?? '']?.title.style.fontSize)
+            this.canvasList[ds.label ?? '']?.echart.setOption(option)
+        }
+    }
+
+    deleteCharts() {
+        for (const label in this.canvasList) {
+            this.canvasList[label].echart.dispose()
+            this.canvasList[label].wrapper?.remove()
+            delete this.canvasList[label]
         }
     }
 
@@ -336,26 +379,37 @@ export class WidgetGauge extends LitElement {
         for (const label in this.canvasList) {
             const ex = this.dataSets.find((ds) => ds.label === label)
             if (!ex) {
+                this.canvasList[label].echart.dispose()
+                this.canvasList[label].wrapper?.remove()
                 delete this.canvasList[label]
-                const containerDiv = this.gaugeContainer?.querySelector(`[name="${label}"]`)
-                containerDiv?.remove()
             }
         }
 
         this.dataSets.forEach((ds) => {
             if (this.canvasList[ds.label ?? '']) return
+            const newWrapper = document.createElement('div')
+            newWrapper.setAttribute('class', 'chart-wrapper')
+            const newTitle = document.createElement('h3')
+            newTitle.textContent = ds.label ?? ''
+            newTitle.style.fontSize = '20px'
             const newCanvas = document.createElement('div')
             newCanvas.setAttribute('name', ds.label ?? '')
             newCanvas.setAttribute('class', 'chart')
             newCanvas.setAttribute(
                 'style',
-                `min-width: 600px; min-height: 400px; width: 600px; height: 400px;`
+                `min-width: 600px; min-height: 250px; width: 600px; height: 250px;`
             )
 
-            this.gaugeContainer!.appendChild(newCanvas)
-            // @ts-ignore
-            this.canvasList[ds.label ?? ''] = echarts.init(newCanvas)
-            this.canvasList[ds.label ?? ''].setOption(structuredClone(this.template))
+            newWrapper!.appendChild(newTitle)
+            newWrapper!.appendChild(newCanvas)
+            this.gaugeContainer!.appendChild(newWrapper)
+            const newChart = echarts.init(newCanvas, this.themeName)
+            this.canvasList[ds.label ?? ''] = { echart: newChart, title: newTitle, container: newWrapper }
+            // this.canvasList[ds.label ?? ''].setOption(structuredClone(this.template))
+            //@ts-ignore
+            this.themeBgColor = newChart._theme.backgroundColor ?? '#fff'
+            //@ts-ignore
+            this.themeColor = newChart._theme.gauge?.title?.color ?? '#000'
         })
         this.sizingSetup()
     }
@@ -381,6 +435,14 @@ export class WidgetGauge extends LitElement {
             width: 100%;
             padding: 16px;
             box-sizing: border-box;
+            color: var(--re-text-color, #000);
+            gap: 12px;
+        }
+
+        .chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .gauge-container {
             display: flex;
@@ -390,13 +452,12 @@ export class WidgetGauge extends LitElement {
             flex-wrap: wrap;
             overflow: hidden;
             position: relative;
-            gap: 12px;
+            gap: 24px;
         }
 
         header {
             display: flex;
             flex-direction: column;
-            margin: 0 0 16px 0;
         }
         h3 {
             margin: 0;
@@ -404,7 +465,6 @@ export class WidgetGauge extends LitElement {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            color: var(--re-text-color, #000) !important;
         }
         p {
             margin: 10px 0 0 0;
@@ -414,12 +474,11 @@ export class WidgetGauge extends LitElement {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            color: var(--re-text-color, #000) !important;
         }
 
         .chart {
             width: 600px; /* will be overriden by adjustSizes */
-            height: 400px;
+            height: 230px;
         }
 
         .no-data {
@@ -436,7 +495,7 @@ export class WidgetGauge extends LitElement {
 
     render() {
         return html`
-            <div class="wrapper">
+            <div class="wrapper" style="background-color: ${this.themeBgColor}; color: ${this.themeColor}">
                 <header class="paging" ?active=${this.inputData?.title || this.inputData?.subTitle}>
                     <h3 class="paging" ?active=${this.inputData?.title}>${this.inputData?.title}</h3>
                     <p class="paging" ?active=${this.inputData?.subTitle}>${this.inputData?.subTitle}</p>
@@ -447,5 +506,3 @@ export class WidgetGauge extends LitElement {
         `
     }
 }
-
-window.customElements.define('widget-gauge-versionplaceholder', WidgetGauge)

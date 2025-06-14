@@ -13,6 +13,10 @@ export type Label = string;
  */
 export type Unit = string;
 /**
+ * The number of decimal places to show in the value. If not specified, precision is 0.
+ */
+export type Precision = number;
+/**
  * This should be an ISO String date like 2023-11-04T22:47:52.351152+00:00. Will only be used to detect data age of data.
  */
 export type Timestamp = string;
@@ -22,7 +26,7 @@ export type Value = number;
  */
 export type SplitDataBy = string;
 /**
- * The data used to draw this gauge.
+ * Provide a list of values. Only the latest value is shown in the gauge unless you configure "Advanced Settings" below or use split data.
  */
 export type Data = {
   tsp?: Timestamp;
@@ -47,11 +51,12 @@ export type AverageLatestValues = number;
 /**
  * If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.
  */
-export type MaximumLatency = number;
+export type MaximumLatencyInSeconds = number;
 export type Gauges = {
   label?: Label;
   valueColor?: ValueColor;
   unit?: Unit;
+  precision?: Precision;
   data?: Data;
   sections?: GaugeColorSections;
   advanced?: AdvancedConfiguration;
@@ -74,6 +79,6 @@ export interface GaugeColorSections {
 }
 export interface AdvancedConfiguration {
   averageLatest?: AverageLatestValues;
-  maxLatency?: MaximumLatency;
+  maxLatency?: MaximumLatencyInSeconds;
   [k: string]: unknown;
 }

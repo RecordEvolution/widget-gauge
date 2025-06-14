@@ -22,32 +22,28 @@
     <body>
         <div id="demo"></div>
         <script src="https://storage.googleapis.com/reswarm-images/ObjectRandomizer.js"></script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"
-            integrity="sha512-k37wQcV4v2h6jgYf5IUz1MoSKPpDs630XGSmCaCCOXxy2awgAWKHGZWr9nMyGgk3IOxA1NxdkN8r1JHgkUtMoQ=="
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"
-        ></script>
 
         <script type="module">
             import { html, render } from 'lit'
-            import '../dist/src/widget-gauge.js'
+            import '../dist/widget-gauge.js'
             const response = await fetch('../src/default-data.json')
             const data = await response.json()
 
+            render(
+                html`
+                    <widget-gauge-versionplaceholder .inputData=${data}>
+                        some light-dom
+                    </widget-gauge-versionplaceholder>
+                `,
+                document.getElementById('demo')
+            )
+            const widget = document.getElementById('demo').children[0]
             const keyPathsToRandomize = ['dataseries.0.data.0.value', 'settings.title']
             const inter = setInterval(() => {
                 const randomizedObj = randomizeObjectValues(data, keyPathsToRandomize)
 
-                // console.log('random', randomizedObj.dataseries[0].data[0]);
-                render(
-                    html`
-                        <widget-gauge-versionplaceholder .inputData=${randomizedObj}>
-                            some light-dom
-                        </widget-gauge-versionplaceholder>
-                    `,
-                    document.querySelector('#demo')
-                )
+                // console.log('random', randomizedObj.dataseries[0].data[0])
+                widget.inputData = randomizedObj
                 // clearInterval(inter)
             }, 1000)
         </script>
