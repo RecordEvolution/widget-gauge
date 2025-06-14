@@ -9,8 +9,6 @@ import { CanvasRenderer, SVGRenderer } from 'echarts/renderers'
 
 echarts.use([TooltipComponent, GaugeChart, CanvasRenderer])
 
-console.log('WidgetGauge loaded', echarts)
-
 type Dataseries = Exclude<GaugeChartConfiguration['dataseries'], undefined>[number]
 type Data = Exclude<Dataseries['data'], undefined>[number]
 
@@ -19,8 +17,11 @@ export class WidgetGauge extends LitElement {
     @property({ type: Object })
     inputData?: GaugeChartConfiguration
 
+    @property({ type: Object })
+    themeObject?: any
+
     @property({ type: String })
-    themeName?: string = 'light'
+    themeName: string = 'light'
 
     @state()
     private dataSets: Dataseries[] = []
@@ -155,6 +156,10 @@ export class WidgetGauge extends LitElement {
             this.transformData()
         }
 
+        if (changedProperties.has('themeObject')) {
+            this.registerTheme(this.themeObject)
+        }
+
         if (changedProperties.has('themeName')) {
             this.deleteCharts()
             this.setupCharts()
@@ -166,6 +171,14 @@ export class WidgetGauge extends LitElement {
         this.resizeObserver.observe(this.shadowRoot?.querySelector('.wrapper') as HTMLDivElement)
         this.gaugeContainer = this.shadowRoot?.querySelector('.gauge-container')
         this.transformData()
+    }
+
+    registerTheme(themeObject: any) {
+        if (!themeObject) return
+        if (typeof themeObject === 'string') {
+            return
+        }
+        echarts.registerTheme(this.themeName, this.themeObject)
     }
 
     sizingSetup() {
@@ -361,7 +374,6 @@ export class WidgetGauge extends LitElement {
             this.canvasList[ds.label ?? ''].title.style.fontSize = String(20 * modifier) + 'px'
             this.canvasList[ds.label ?? ''].title.style.maxWidth = String(300 * modifier) + 'px'
             this.canvasList[ds.label ?? ''].title.style.height = String(25 * modifier) + 'px'
-            console.log('Applying data to chart', this.canvasList[ds.label ?? '']?.title.style.fontSize)
             this.canvasList[ds.label ?? '']?.echart.setOption(option)
         }
     }
@@ -403,8 +415,9 @@ export class WidgetGauge extends LitElement {
             newWrapper!.appendChild(newTitle)
             newWrapper!.appendChild(newCanvas)
             this.gaugeContainer!.appendChild(newWrapper)
+
             const newChart = echarts.init(newCanvas, this.themeName)
-            this.canvasList[ds.label ?? ''] = { echart: newChart, title: newTitle, container: newWrapper }
+            this.canvasList[ds.label ?? ''] = { echart: newChart, title: newTitle, wrapper: newWrapper }
             // this.canvasList[ds.label ?? ''].setOption(structuredClone(this.template))
             //@ts-ignore
             this.themeBgColor = newChart._theme.backgroundColor ?? '#fff'
