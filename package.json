@@ -13,7 +13,7 @@
     ],
     "scripts": {
         "analyze": "cem analyze --litelement",
-        "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
+        "start": "concurrently -k -r \"npm run watch\" \"wds\"",
         "build": "rollup -c rollup.config.js",
         "watch": "rollup -w -c rollup.config.js",
         "link": "npm link && cd ../RESWARM/frontend && npm link @record-evolution/widget-gauge",
@@ -24,32 +24,26 @@
         "release": "npm version patch --tag-version-prefix='' && git push && git push --tag"
     },
     "dependencies": {
-        "echarts": "^5.5.1",
-        "lit": "^3.2.0"
+        "echarts": "5.6.0",
+        "lit": "^3.3.0"
     },
     "devDependencies": {
-        "@custom-elements-manifest/analyzer": "^0.10.3",
+        "@custom-elements-manifest/analyzer": "^0.10.4",
         "@rollup/plugin-babel": "^6.0.4",
-        "@rollup/plugin-commonjs": "^28.0.0",
-        "@rollup/plugin-node-resolve": "^15.3.0",
-        "@rollup/plugin-replace": "^6.0.1",
-        "@rollup/plugin-typescript": "^12.1.0",
-        "@typescript-eslint/eslint-plugin": "^8.8.0",
-        "@typescript-eslint/parser": "^8.8.0",
+        "@rollup/plugin-commonjs": "^28.0.3",
+        "@rollup/plugin-node-resolve": "^16.0.1",
+        "@rollup/plugin-replace": "^6.0.2",
+        "@rollup/plugin-typescript": "^12.1.2",
+        "@typescript-eslint/eslint-plugin": "^8.34.0",
+        "@typescript-eslint/parser": "^8.34.0",
         "@web/dev-server": "^0.4.6",
-        "concurrently": "^9.0.1",
-        "deepmerge": "^4.3.1",
-        "es-dev-server": "^2.1.0",
-        "eslint": "^9.11.1",
-        "eslint-config-prettier": "^9.1.0",
-        "husky": "^9.1.6",
-        "json-schema-to-typescript": "^15.0.2",
-        "lint-staged": "^15.2.10",
-        "prettier": "^3.3.3",
-        "rimraf": "^6.0.1",
-        "rollup": "^4.24.0",
-        "tslib": "^2.7.0",
-        "typescript": "5.3.2"
+        "concurrently": "^9.1.2",
+        "eslint": "^9.29.0",
+        "eslint-config-prettier": "^10.1.5",
+        "json-schema-to-typescript": "^15.0.4",
+        "prettier": "^3.5.3",
+        "rollup": "^4.43.0",
+        "typescript": "5.8.3"
     },
     "repository": {
         "type": "git",

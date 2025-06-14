@@ -1,10 +1,11 @@
 {
-    "settings": {},
+    "title": "Demo Gauge",
+    "subTitle": "A simple gauge demo",
     "dataseries": [
         {
             "label": "Demo Gauge Temperature",
             "unit": "°C",
-            "valueColor": "black",
+            "precision": 1,
             "data": [
                 {
                     "value": 90
@@ -21,7 +22,6 @@
         {
             "label": "Demo Gauge Pascal",
             "unit": "Pa",
-            "valueColor": "green",
             "data": [
                 {
                     "value": 79

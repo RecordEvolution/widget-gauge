@@ -19,8 +19,10 @@ export default {
     },
     plugins: [
         replace({
-            versionplaceholder: npmPackage.version,
-            preventAssignment: true
+            preventAssignment: true,
+            'process.env.NODE_ENV': JSON.stringify('production'),
+            versionplaceholder: process.env.ENV === 'PROD' ? npmPackage.version : 'versionplaceholder',
+            delimiters: ['', '']
         }),
         typescript({ sourceMap: true }),
         nodeResolve(),

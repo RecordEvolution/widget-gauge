@@ -38,6 +38,13 @@
                         "dataDrivenDisabled": false,
                         "order": 3
                     },
+                    "precision": {
+                        "title": "Precision",
+                        "description": "The number of decimal places to show in the value. If not specified, precision is 0.",
+                        "type": "number",
+                        "dataDrivenDisabled": false,
+                        "order": 4
+                    },
                     "data": {
                         "title": "Data",
                         "description": "Provide a list of values. Only the latest value is shown in the gauge unless you configure \"Advanced Settings\" below or use split data.",
@@ -111,7 +118,7 @@
                                 "order": 6
                             },
                             "maxLatency": {
-                                "title": "Maximum Latency",
+                                "title": "Maximum Latency in seconds",
                                 "description": "If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.",
                                 "type": "number",
                                 "dataDrivenDisabled": true,
