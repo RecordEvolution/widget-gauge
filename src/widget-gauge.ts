@@ -6,6 +6,7 @@ import * as echarts from 'echarts/core'
 import { TooltipComponent } from 'echarts/components'
 import { GaugeChart, GaugeSeriesOption } from 'echarts/charts'
 import { CanvasRenderer, SVGRenderer } from 'echarts/renderers'
+import { EChartsOption, SeriesOption } from 'echarts'
 
 echarts.use([TooltipComponent, GaugeChart, CanvasRenderer])
 
@@ -40,7 +41,7 @@ export class WidgetGauge extends LitElement {
     boxes?: HTMLDivElement[]
     origWidth: number = 0
     origHeight: number = 0
-    template: any
+    template: EChartsOption
     modifier: number = 1
     version: string = 'versionplaceholder'
     gaugeContainer: HTMLDivElement | null | undefined
@@ -96,12 +97,13 @@ export class WidgetGauge extends LitElement {
                     data: [
                         {
                             value: 70,
-                            name: 'nASDf'
+                            name: 'Value Name'
                         }
                     ]
-                } as GaugeSeriesOption,
+                } as SeriesOption,
                 {
                     type: 'gauge',
+                    name: 'Gauge B',
                     startAngle: 180,
                     endAngle: 0,
                     min: 33,
@@ -131,7 +133,7 @@ export class WidgetGauge extends LitElement {
                         text: 'Gauge B',
                         offsetCenter: [0, '-35%'],
                         fontSize: 20,
-                        show: false
+                        show: true
                     },
                     axisLabel: {
                         distance: -20,
@@ -139,7 +141,7 @@ export class WidgetGauge extends LitElement {
                         rotate: 'tangential',
                         fontSize: 12
                     }
-                } as GaugeSeriesOption
+                } as SeriesOption
             ]
         }
     }
@@ -312,12 +314,9 @@ export class WidgetGauge extends LitElement {
 
             // const option = this.canvasList[ds.label].getOption()
             const option = window.structuredClone(this.template)
-            const ga = option.series[0],
-                ga2 = option.series[1]
-
-            // Title
-            option.title.text = ds.label
-            option.title.textStyle.fontSize = 25 * modifier
+            const seriesArr = option.series as GaugeSeriesOption[]
+            const ga: any = seriesArr?.[0],
+                ga2: any = seriesArr?.[1]
 
             // Needle
             // Check age of data Latency
