@@ -5,80 +5,80 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type Title = string
-export type Subtitle = string
-export type Label = string
+export type Title = string;
+export type Subtitle = string;
+export type Label = string;
 /**
  * The unit of the values. e.g. °C or km/h
  */
-export type Unit = string
+export type Unit = string;
 /**
  * The number of decimal places to show in the value. If not specified, precision is 0.
  */
-export type Precision = number
+export type Precision = number;
 /**
  * This should be an ISO String date like 2023-11-04T22:47:52.351152+00:00. Will only be used to detect data age of data.
  */
-export type Timestamp = string
-export type Value = number
+export type Timestamp = string;
+export type Value = number;
 /**
  * You can specify a table column to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as split column, then you will get a gauge for each city.
  */
-export type SplitDataBy = string
+export type SplitDataBy = string;
 /**
  * Provide a list of values. Only the latest value is shown in the gauge unless you configure "Advanced Settings" below or use split data.
  */
 export type Data = {
-    tsp?: Timestamp
-    value?: Value
-    pivot?: SplitDataBy
-    [k: string]: unknown
-}[]
+    tsp?: Timestamp;
+    value?: Value;
+    pivot?: SplitDataBy;
+    [k: string]: unknown;
+}[];
 /**
  * The limits of the gauge sections. Starting from the min value, ending with the max value.
  */
-export type SectionLimits = number[]
+export type SectionLimits = number[];
 /**
  * Background color for each section. This Array is one shorter than the number of sections.
  */
 export type SectionBackgroundColors = {
-    [k: string]: unknown
-}[]
+    [k: string]: unknown;
+}[];
 /**
  * Calculate the average over the given number of newest values. (If you use 'split by', then per each of the split dataseries.) If not specified then the latest value is shown without modification.
  */
-export type AverageLatestValues = number
+export type AverageLatestValues = number;
 /**
  * If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.
  */
-export type MaximumLatencyInSeconds = number
+export type MaximumLatencyInSeconds = number;
 export type Gauges = {
-    label?: Label
-    valueColor?: ValueColor
-    unit?: Unit
-    precision?: Precision
-    data?: Data
-    sections?: GaugeColorSections
-    advanced?: AdvancedConfiguration
-    [k: string]: unknown
-}[]
+    label?: Label;
+    valueColor?: ValueColor;
+    unit?: Unit;
+    precision?: Precision;
+    data?: Data;
+    sections?: GaugeColorSections;
+    advanced?: AdvancedConfiguration;
+    [k: string]: unknown;
+}[];
 
 export interface GaugeChartConfiguration {
-    title?: Title
-    subTitle?: Subtitle
-    dataseries?: Gauges
-    [k: string]: unknown
+    title?: Title;
+    subTitle?: Subtitle;
+    dataseries?: Gauges;
+    [k: string]: unknown;
 }
 export interface ValueColor {
-    [k: string]: unknown
+    [k: string]: unknown;
 }
 export interface GaugeColorSections {
-    sectionLimits?: SectionLimits
-    backgroundColors?: SectionBackgroundColors
-    [k: string]: unknown
+    sectionLimits?: SectionLimits;
+    backgroundColors?: SectionBackgroundColors;
+    [k: string]: unknown;
 }
 export interface AdvancedConfiguration {
-    averageLatest?: AverageLatestValues
-    maxLatency?: MaximumLatencyInSeconds
-    [k: string]: unknown
+    averageLatest?: AverageLatestValues;
+    maxLatency?: MaximumLatencyInSeconds;
+    [k: string]: unknown;
 }
