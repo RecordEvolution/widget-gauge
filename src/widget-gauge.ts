@@ -22,7 +22,7 @@ export class WidgetGauge extends LitElement {
     themeObject?: any
 
     @property({ type: String })
-    themeName: string = 'light'
+    themeName?: string
 
     @state()
     private dataSets: Dataseries[] = []
@@ -31,10 +31,10 @@ export class WidgetGauge extends LitElement {
     private canvasList: any = {}
 
     @state()
-    private themeBgColor: string = '#fff'
+    private themeBgColor?: string
 
     @state()
-    private themeColor: string = '#000'
+    private themeColor?: string
 
     private resizeObserver: ResizeObserver
 
@@ -159,10 +159,11 @@ export class WidgetGauge extends LitElement {
         }
 
         if (changedProperties.has('themeObject')) {
-            this.registerTheme(this.themeObject)
+            this.registerTheme(this.themeName, this.themeObject)
         }
 
         if (changedProperties.has('themeName')) {
+            this.registerTheme(this.themeName, this.themeObject)
             this.deleteCharts()
             this.setupCharts()
         }
@@ -175,12 +176,10 @@ export class WidgetGauge extends LitElement {
         this.transformData()
     }
 
-    registerTheme(themeObject: any) {
-        if (!themeObject) return
-        if (typeof themeObject === 'string') {
-            return
-        }
-        echarts.registerTheme(this.themeName, this.themeObject)
+    registerTheme(themeName?: string, themeObject?: any) {
+        if (!themeObject || !themeName) return
+
+        echarts.registerTheme(themeName, this.themeObject)
     }
 
     sizingSetup() {
@@ -297,6 +296,7 @@ export class WidgetGauge extends LitElement {
         for (const ds of this.dataSets) {
             // compute derivative values
             // filter latest values and calculate average
+            ds.label ??= ''
             ds.advanced ??= {}
             if (typeof ds.advanced?.averageLatest !== 'number' || isNaN(ds.advanced?.averageLatest))
                 ds.advanced.averageLatest = 1
@@ -370,10 +370,13 @@ export class WidgetGauge extends LitElement {
             ga.progress.itemStyle.color = progressColor
             ga.progress.width = 60 * modifier
             // Apply
-            this.canvasList[ds.label ?? ''].title.style.fontSize = String(20 * modifier) + 'px'
-            this.canvasList[ds.label ?? ''].title.style.maxWidth = String(300 * modifier) + 'px'
-            this.canvasList[ds.label ?? ''].title.style.height = String(25 * modifier) + 'px'
-            this.canvasList[ds.label ?? '']?.echart.setOption(option)
+            const titleElement = this.canvasList[ds.label]?.title
+            titleElement.style.fontSize = String(20 * modifier) + 'px'
+            titleElement.style.maxWidth = String(300 * modifier) + 'px'
+            titleElement.style.height = String(25 * modifier) + 'px'
+            titleElement.textContent = ds.label ?? ''
+
+            this.canvasList[ds.label]?.echart.setOption(option)
         }
     }
 
@@ -401,7 +404,6 @@ export class WidgetGauge extends LitElement {
             const newWrapper = document.createElement('div')
             newWrapper.setAttribute('class', 'chart-wrapper')
             const newTitle = document.createElement('h3')
-            newTitle.textContent = ds.label ?? ''
             newTitle.style.fontSize = '20px'
             const newCanvas = document.createElement('div')
             newCanvas.setAttribute('name', ds.label ?? '')
@@ -419,9 +421,9 @@ export class WidgetGauge extends LitElement {
             this.canvasList[ds.label ?? ''] = { echart: newChart, title: newTitle, wrapper: newWrapper }
             // this.canvasList[ds.label ?? ''].setOption(structuredClone(this.template))
             //@ts-ignore
-            this.themeBgColor = newChart._theme.backgroundColor ?? '#fff'
+            this.themeBgColor = newChart?._theme?.backgroundColor
             //@ts-ignore
-            this.themeColor = newChart._theme.gauge?.title?.color ?? '#000'
+            this.themeColor = newChart?._theme?.gauge?.title?.color
         })
         this.sizingSetup()
     }

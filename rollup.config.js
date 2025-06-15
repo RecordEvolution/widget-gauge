@@ -21,7 +21,7 @@ export default {
         replace({
             preventAssignment: true,
             'process.env.NODE_ENV': JSON.stringify('production'),
-            versionplaceholder: process.env.ENV === 'PROD' ? npmPackage.version : 'versionplaceholder',
+            versionplaceholder: npmPackage.version,
             delimiters: ['', '']
         }),
         typescript({ sourceMap: true }),

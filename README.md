@@ -19,10 +19,12 @@ npm i widget-gauge
     import 'widget-gauge'
 </script>
 
-<widget-gauge inputData="default-data"></widget-gauge>
+<widget-gauge-1.6.0 inputData="default-data"></widget-gauge-1.6.0>
 ```
 
 ## Development
+
+> Make sure to always keep the widget tag name in sync with the version string in the package.json. i.e in `demo/index.html` you need to replace the version string here. `<widget-gauge-1.6.3>`
 
 To use the widget locally during development clone the widget repo and start the dev server:
 
