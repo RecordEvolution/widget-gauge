@@ -5,7 +5,7 @@ import { GaugeChartConfiguration } from './definition-schema.js'
 import * as echarts from 'echarts/core'
 import { TooltipComponent } from 'echarts/components'
 import { GaugeChart, GaugeSeriesOption } from 'echarts/charts'
-import { CanvasRenderer, SVGRenderer } from 'echarts/renderers'
+import { CanvasRenderer } from 'echarts/renderers'
 import { EChartsOption, SeriesOption } from 'echarts'
 
 echarts.use([TooltipComponent, GaugeChart, CanvasRenderer])
@@ -33,11 +33,9 @@ export class WidgetGauge extends LitElement {
         { echart?: echarts.ECharts; title?: HTMLHeadingElement; wrapper?: HTMLDivElement }
     > = new Map()
 
-    @state()
-    private themeBgColor?: string
-
-    @state()
-    private themeColor?: string
+    @state() private themeBgColor?: string
+    @state() private themeTitleColor?: string
+    @state() private themeSubtitleColor?: string
 
     private resizeObserver: ResizeObserver
 
@@ -51,7 +49,10 @@ export class WidgetGauge extends LitElement {
 
     constructor() {
         super()
-        this.resizeObserver = new ResizeObserver(this.adjustSizes.bind(this))
+        this.resizeObserver = new ResizeObserver(() => {
+            this.adjustSizes()
+            this.applyData()
+        })
 
         this.template = {
             title: {
@@ -159,12 +160,19 @@ export class WidgetGauge extends LitElement {
     update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
         if (changedProperties.has('inputData') && this.gaugeContainer) {
             this.transformData()
+            this.setupCharts()
+            this.sizingSetup()
+            this.adjustSizes()
+            this.applyData()
         }
 
         if (changedProperties.has('theme')) {
             this.registerTheme(this.theme)
             this.deleteCharts()
             this.transformData()
+            this.setupCharts()
+            this.sizingSetup()
+            this.adjustSizes()
             this.applyData()
         }
         super.update(changedProperties)
@@ -174,6 +182,10 @@ export class WidgetGauge extends LitElement {
         this.resizeObserver.observe(this.shadowRoot?.querySelector('.wrapper') as HTMLDivElement)
         this.gaugeContainer = this.shadowRoot?.querySelector('.gauge-container')
         this.transformData()
+        this.setupCharts()
+        this.sizingSetup()
+        this.adjustSizes()
+        this.applyData()
     }
 
     registerTheme(theme?: Theme) {
@@ -181,6 +193,12 @@ export class WidgetGauge extends LitElement {
         if (!theme || !theme.theme_object || !theme.theme_name) return
 
         echarts.registerTheme(theme.theme_name, theme.theme_object)
+        const cssTextColor = getComputedStyle(this).getPropertyValue('--re-text-color').trim()
+        const cssBgColor = getComputedStyle(this).getPropertyValue('--re-background-color').trim()
+        this.themeBgColor = cssBgColor || this.theme?.theme_object?.backgroundColor
+        this.themeTitleColor = cssTextColor || this.theme?.theme_object?.title?.textStyle?.color
+        this.themeSubtitleColor =
+            cssTextColor || this.theme?.theme_object?.title?.subtextStyle?.color || this.themeTitleColor
     }
 
     sizingSetup() {
@@ -252,7 +270,6 @@ export class WidgetGauge extends LitElement {
         this.canvasList.forEach((canvasObj) => {
             canvasObj.echart?.resize()
         })
-        this.applyData()
     }
 
     async transformData() {
@@ -280,9 +297,6 @@ export class WidgetGauge extends LitElement {
                     this.dataSets.push(pds)
                 })
             })
-
-        this.setupCharts()
-        this.adjustSizes()
     }
 
     applyData() {
@@ -331,8 +345,8 @@ export class WidgetGauge extends LitElement {
             ga.data[0].value = ds.needleValue
             ga.data[0].name = ds.unit
             ga.title.fontSize = 25 * modifier
-            ga.title.color = ds.valueColor ?? this.themeColor
-            ga.detail.color = ds.valueColor ?? this.themeColor
+            ga.title.color = ds.valueColor ?? this.themeTitleColor
+            ga.detail.color = ds.valueColor ?? this.themeTitleColor
             ga.detail.fontSize = 40 * modifier
             ga.detail.formatter = (val: number) =>
                 isNaN(val) ? '-' : val.toFixed(Math.floor(ds.precision ?? 0))
@@ -423,18 +437,12 @@ export class WidgetGauge extends LitElement {
 
             const newChart = echarts.init(newCanvas, this.theme?.theme_name)
             this.canvasList.set(ds.label ?? '', { echart: newChart, title: newTitle, wrapper: newWrapper })
-            //@ts-ignore
-            this.themeBgColor = newChart?._theme?.backgroundColor
-            //@ts-ignore
-            this.themeColor = newChart._theme?.title?.textStyle?.color
         })
-        this.sizingSetup()
     }
 
     static styles = css`
         :host {
             display: block;
-            color: var(--re-text-color, #000);
             font-family: sans-serif;
             box-sizing: border-box;
             position: relative;
@@ -452,7 +460,6 @@ export class WidgetGauge extends LitElement {
             width: 100%;
             padding: 16px;
             box-sizing: border-box;
-            color: var(--re-text-color, #000);
             gap: 12px;
         }
 
@@ -500,7 +507,6 @@ export class WidgetGauge extends LitElement {
 
         .no-data {
             font-size: 20px;
-            color: var(--re-text-color, #000);
             display: flex;
             height: 100%;
             width: 100%;
@@ -512,10 +518,19 @@ export class WidgetGauge extends LitElement {
 
     render() {
         return html`
-            <div class="wrapper" style="background-color: ${this.themeBgColor}; color: ${this.themeColor}">
+            <div
+                class="wrapper"
+                style="background-color: ${this.themeBgColor}; color: ${this.themeTitleColor}"
+            >
                 <header class="paging" ?active=${this.inputData?.title || this.inputData?.subTitle}>
                     <h3 class="paging" ?active=${this.inputData?.title}>${this.inputData?.title}</h3>
-                    <p class="paging" ?active=${this.inputData?.subTitle}>${this.inputData?.subTitle}</p>
+                    <p
+                        class="paging"
+                        ?active=${this.inputData?.subTitle}
+                        style="color: ${this.themeSubtitleColor}"
+                    >
+                        ${this.inputData?.subTitle}
+                    </p>
                 </header>
                 <div class="paging no-data" ?active=${!this.dataSets.length}>No Data</div>
                 <div class="gauge-container"></div>
