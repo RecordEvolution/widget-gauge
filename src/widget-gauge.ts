@@ -181,6 +181,7 @@ export class WidgetGauge extends LitElement {
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
         this.resizeObserver.observe(this.shadowRoot?.querySelector('.wrapper') as HTMLDivElement)
         this.gaugeContainer = this.shadowRoot?.querySelector('.gauge-container')
+        this.registerTheme(this.theme)
         this.transformData()
         this.setupCharts()
         this.sizingSetup()
@@ -189,16 +190,16 @@ export class WidgetGauge extends LitElement {
     }
 
     registerTheme(theme?: Theme) {
-        console.log('Registering theme', theme)
-        if (!theme || !theme.theme_object || !theme.theme_name) return
-
-        echarts.registerTheme(theme.theme_name, theme.theme_object)
         const cssTextColor = getComputedStyle(this).getPropertyValue('--re-text-color').trim()
         const cssBgColor = getComputedStyle(this).getPropertyValue('--re-background-color').trim()
         this.themeBgColor = cssBgColor || this.theme?.theme_object?.backgroundColor
         this.themeTitleColor = cssTextColor || this.theme?.theme_object?.title?.textStyle?.color
         this.themeSubtitleColor =
             cssTextColor || this.theme?.theme_object?.title?.subtextStyle?.color || this.themeTitleColor
+
+        if (!theme || !theme.theme_object || !theme.theme_name) return
+
+        echarts.registerTheme(theme.theme_name, theme.theme_object)
     }
 
     sizingSetup() {
