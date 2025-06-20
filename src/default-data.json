@@ -1,6 +1,4 @@
 {
-    "title": "Demo Gauge",
-    "subTitle": "A simple gauge demo",
     "dataseries": [
         {
             "label": "Demo Gauge Temperature",
