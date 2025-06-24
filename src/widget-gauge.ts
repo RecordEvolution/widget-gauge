@@ -323,11 +323,12 @@ export class WidgetGauge extends LitElement {
 
             ds.needleValue = isNaN(average) ? ds.sections?.sectionLimits?.[0] : average
 
+            // The full range of the gauge
             ds.range =
                 (ds.sections?.sectionLimits?.[ds.sections?.sectionLimits?.length - 1] ?? 100) -
                 (ds.sections?.sectionLimits?.[0] ?? 0)
             if (isNaN(ds.range as number)) ds.range = 100
-            ds.ranges = ds.sections?.sectionLimits?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
+            // ds.ranges = ds.sections?.sectionLimits?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
 
             const echart = this.canvasList.get(ds.label)?.echart
             const option = echart?.getOption() ?? window.structuredClone(this.template)
@@ -355,16 +356,24 @@ export class WidgetGauge extends LitElement {
             // ga.pointer.itemStyle.color = ds.valueColor
 
             // Axis
-            ga2.min = ds.sections?.sectionLimits?.length ? Math.min(...ds.sections?.sectionLimits) : 0
-            ga2.max = ds.sections?.sectionLimits?.length ? Math.max(...ds.sections?.sectionLimits) : 100
+            const sectionLimits = ds.sections?.sectionLimits ?? [0, 40, 80, 100]
+            ga2.min = sectionLimits?.length ? Math.min(...sectionLimits) : 0
+            ga2.max = sectionLimits?.length ? Math.max(...sectionLimits) : 100
             ga.min = ga2.min
             ga.max = ga2.max
-            const colorSections = ds.sections?.backgroundColors
-                ?.map((b, i) => [
-                    ((ds.sections?.sectionLimits?.[i + 1] ?? ga.min) - ga.min) / (ds.range as number),
-                    b
-                ])
-                .filter(([s]) => !isNaN(s as number))
+
+            const tcolors = this.theme?.theme_object?.color
+            const colors: string[] = ds.sections?.backgroundColors?.map(
+                (b, i) => b || tcolors[i % (tcolors?.length ?? 0)]
+            ) ??
+                tcolors?.slice(0, 3) ?? ['#bf444c', '#d88273', '#f6efa6']
+
+            // percentages of the sections paired with the colors
+            const colorSections = colors
+                ?.map((b, i) => [((sectionLimits?.[i + 1] ?? ga.min) - ga.min) / (ds.range as number), b])
+                .filter(([s]) => !isNaN(s as number)) ?? [1 / 3, 1 / 3, 1 / 3]
+
+            console.log('Color sections', colorSections, sectionLimits)
             ga2.axisLine.lineStyle.width = 8 * modifier
             ga2.axisLine.lineStyle.color = colorSections?.length
                 ? colorSections
@@ -376,11 +385,10 @@ export class WidgetGauge extends LitElement {
             ga2.splitLine.distance = -16 * modifier
 
             // Progress
-            let progressColor = ds.sections?.backgroundColors?.[ds.sections?.backgroundColors.length - 1]
-            for (const [i, s] of ds.sections?.sectionLimits?.entries() ?? []) {
+            let progressColor = colors?.[colors.length - 1]
+            for (const [i, s] of sectionLimits?.entries() ?? []) {
                 if (s > (ds.needleValue as number)) {
-                    progressColor =
-                        ds.sections?.backgroundColors?.[i - 1] ?? ds.sections?.backgroundColors?.[0]
+                    progressColor = colors?.[i - 1] ?? colors?.[0]
                     break
                 }
             }

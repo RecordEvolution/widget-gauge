@@ -31,8 +31,8 @@
             const tag = unsafeStatic(`widget-gauge-${packageJson.version}`)
             import '../dist/widget-gauge.js'
             const data = await fetch('../src/default-data.json').then((res) => res.json())
-            const themeObject = await fetch('themes/vintage.json').then((res) => res.json())
-            const theme = { theme_name: 'vintage', theme_object: themeObject }
+            const themeObject = await fetch('themes/chalk.json').then((res) => res.json())
+            const theme = { theme_name: 'chalk', theme_object: themeObject }
             render(
                 html`
                     <${tag} .theme="${theme}" .inputData=${data}>
