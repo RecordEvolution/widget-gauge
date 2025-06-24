@@ -1,6 +1,23 @@
 {
     "dataseries": [
         {
+            "label": "Demo Gauge Temperature",
+            "unit": "°C",
+            "precision": 1,
+            "data": [
+                {
+                    "value": 83
+                }
+            ],
+            "sections": {
+                "sectionLimits": [],
+                "backgroundColors": []
+            },
+            "advanced": {
+                "averageLatest": 1
+            }
+        },
+        {
             "label": "Demo Gauge Pascal",
             "unit": "Pa",
             "data": [

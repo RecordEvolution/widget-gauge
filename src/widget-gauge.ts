@@ -1,6 +1,6 @@
 import { html, css, LitElement, PropertyValueMap } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
-import { GaugeChartConfiguration } from './definition-schema.js'
+import { GaugeChartConfiguration, SectionBackgroundColors } from './definition-schema.js'
 
 import * as echarts from 'echarts/core'
 import { TooltipComponent } from 'echarts/components'
@@ -356,14 +356,20 @@ export class WidgetGauge extends LitElement {
             // ga.pointer.itemStyle.color = ds.valueColor
 
             // Axis
-            const sectionLimits = ds.sections?.sectionLimits ?? [0, 40, 80, 100]
+            const sectionLimits = !ds.sections?.sectionLimits?.length
+                ? [0, 40, 80, 100]
+                : ds.sections?.sectionLimits
             ga2.min = sectionLimits?.length ? Math.min(...sectionLimits) : 0
             ga2.max = sectionLimits?.length ? Math.max(...sectionLimits) : 100
             ga.min = ga2.min
             ga.max = ga2.max
 
-            const tcolors = this.theme?.theme_object?.color
-            const colors: string[] = ds.sections?.backgroundColors?.map(
+            const tcolors: SectionBackgroundColors = this.theme?.theme_object?.color
+            const bcolors: SectionBackgroundColors = !ds.sections?.backgroundColors?.length
+                ? (tcolors?.slice(0, 3) ?? ['#bf444c', '#d88273', '#f6efa6'])
+                : ds.sections?.backgroundColors
+
+            const colors: SectionBackgroundColors = bcolors?.map(
                 (b, i) => b || tcolors[i % (tcolors?.length ?? 0)]
             ) ??
                 tcolors?.slice(0, 3) ?? ['#bf444c', '#d88273', '#f6efa6']
