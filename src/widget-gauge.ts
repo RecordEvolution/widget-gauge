@@ -263,7 +263,7 @@ export class WidgetGauge extends LitElement {
         this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
 
         this.boxes?.forEach((box) =>
-            box.setAttribute('style', `width:${modifier * chartW}px; height:${modifier * (chartH - 25)}px`)
+            box.setAttribute('style', `width:${modifier * chartW}px; height:${modifier * (chartH - 27)}px`)
         )
 
         this.modifier = modifier
@@ -346,7 +346,7 @@ export class WidgetGauge extends LitElement {
 
             ga.data[0].value = ds.needleValue
             ga.data[0].name = ds.unit
-            ga.title.fontSize = 25 * modifier
+            ga.title.fontSize = 20 * modifier
             ga.title.color = ds.valueColor ?? this.themeTitleColor
             ga.detail.color = ds.valueColor ?? this.themeTitleColor
             ga.detail.fontSize = 40 * modifier
@@ -405,7 +405,7 @@ export class WidgetGauge extends LitElement {
             if (titleElement) {
                 titleElement.style.fontSize = String(20 * modifier) + 'px'
                 titleElement.style.maxWidth = String(300 * modifier) + 'px'
-                titleElement.style.height = String(25 * modifier) + 'px'
+                titleElement.style.height = String(27 * modifier) + 'px'
                 titleElement.textContent = ds.label ?? ''
             }
 
