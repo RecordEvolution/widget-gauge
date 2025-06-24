@@ -329,8 +329,8 @@ export class WidgetGauge extends LitElement {
             if (isNaN(ds.range as number)) ds.range = 100
             ds.ranges = ds.sections?.sectionLimits?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
 
-            // const option = this.canvasList.get(ds.label)?.echart.getOption()
-            const option = window.structuredClone(this.template)
+            const echart = this.canvasList.get(ds.label)?.echart
+            const option = echart?.getOption() ?? window.structuredClone(this.template)
             const seriesArr = option.series as GaugeSeriesOption[]
             const ga: any = seriesArr?.[0],
                 ga2: any = seriesArr?.[1]
@@ -395,7 +395,7 @@ export class WidgetGauge extends LitElement {
                 titleElement.textContent = ds.label ?? ''
             }
 
-            this.canvasList.get(ds.label)?.echart?.setOption(option)
+            echart?.setOption(option)
         }
     }
     deleteCharts() {
