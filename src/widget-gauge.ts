@@ -379,7 +379,6 @@ export class WidgetGauge extends LitElement {
                 ?.map((b, i) => [((sectionLimits?.[i + 1] ?? ga.min) - ga.min) / (ds.range as number), b])
                 .filter(([s]) => !isNaN(s as number)) ?? [1 / 3, 1 / 3, 1 / 3]
 
-            console.log('Color sections', colorSections, sectionLimits)
             ga2.axisLine.lineStyle.width = 8 * modifier
             ga2.axisLine.lineStyle.color = colorSections?.length
                 ? colorSections
