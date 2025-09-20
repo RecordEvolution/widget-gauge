@@ -348,7 +348,9 @@ export class WidgetGauge extends LitElement {
             ga.data[0].name = ds.unit
             ga.title.fontSize = 20 * modifier
             ga.title.color = ds.valueColor ?? this.themeTitleColor
+            ga.title.opacity = 1
             ga.detail.color = ds.valueColor ?? this.themeTitleColor
+            ga.detail.opacity = 1
             ga.detail.fontSize = 40 * modifier
             ga.detail.formatter = (val: number) =>
                 isNaN(val) ? '-' : val.toFixed(Math.floor(ds.precision ?? 0))
