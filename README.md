@@ -1,9 +1,7 @@
 # \<widget-gauge>
 
-<div style="display:flex;flex-direction:row;flex-wrap:wrap;">
-  <img style="height:200px;margin-right: 16px;" src="https://res.cloudinary.com/dotw7ar1m/image/upload/v1707923602/gckk9yq5mlm3oxemxmqc.png" />
-  <img style="height:200px" src="https://res.cloudinary.com/dotw7ar1m/image/upload/v1707923602/hrgrn3wz7xuz5pfjy9wp.png" />
-</div>
+![thumbnail](thumbnail.png)
+
 <br>
 
 # The usage
