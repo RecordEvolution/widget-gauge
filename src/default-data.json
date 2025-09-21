@@ -1,7 +1,7 @@
 {
     "dataseries": [
         {
-            "label": "Demo Gauge Temperature",
+            "label": "Temperature",
             "unit": "°C",
             "precision": 1,
             "data": [
@@ -16,15 +16,6 @@
             "advanced": {
                 "averageLatest": 1
             }
-        },
-        {
-            "label": "Demo Gauge Pascal",
-            "unit": "Pa",
-            "data": [
-                {
-                    "value": 79
-                }
-            ]
         }
     ]
 }

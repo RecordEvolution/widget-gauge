@@ -89,8 +89,7 @@ export class WidgetGauge extends LitElement {
                     detail: {
                         valueAnimation: false,
                         fontSize: 25,
-                        offsetCenter: [0, '-7%'],
-                        color: 'inherit'
+                        offsetCenter: [0, '-7%']
                     },
                     title: {
                         text: 'Gauge A',
@@ -209,10 +208,10 @@ export class WidgetGauge extends LitElement {
             Array.from(this?.shadowRoot?.querySelectorAll('.chart-wrapper') as NodeListOf<HTMLDivElement>) ??
             []
         if (!this.boxes.length) return
-        this.origWidth =
-            this.boxes?.map((b) => b.getBoundingClientRect().width).reduce((p, c) => (c > p ? c : p), 0) ?? 0
-        this.origHeight =
-            this.boxes?.map((b) => b.getBoundingClientRect().height).reduce((p, c) => (c > p ? c : p), 0) ?? 0
+        this.origWidth = 600
+        // this.boxes?.map((b) => b.getBoundingClientRect().width).reduce((p, c) => (c > p ? c : p), 0) ?? 0
+        this.origHeight = 230
+        // this.boxes?.map((b) => b.getBoundingClientRect().height).reduce((p, c) => (c > p ? c : p), 0) ?? 0
     }
 
     adjustSizes() {
@@ -346,12 +345,15 @@ export class WidgetGauge extends LitElement {
 
             ga.data[0].value = ds.needleValue
             ga.data[0].name = ds.unit
+            // unit style
             ga.title.fontSize = 20 * modifier
             ga.title.color = ds.valueColor ?? this.themeTitleColor
             ga.title.opacity = 1
+            // value style
             ga.detail.color = ds.valueColor ?? this.themeTitleColor
             ga.detail.opacity = 1
             ga.detail.fontSize = 40 * modifier
+
             ga.detail.formatter = (val: number) =>
                 isNaN(val) ? '-' : val.toFixed(Math.floor(ds.precision ?? 0))
             // ga.anchor.itemStyle.color = ds.valueColor
@@ -401,7 +403,7 @@ export class WidgetGauge extends LitElement {
             }
             ga.progress.itemStyle.color = progressColor
             ga.progress.width = 60 * modifier
-            // Apply
+
             const titleElement = this.canvasList.get(ds.label)?.title
             if (titleElement) {
                 titleElement.style.fontSize = String(20 * modifier) + 'px'
@@ -410,6 +412,7 @@ export class WidgetGauge extends LitElement {
                 titleElement.textContent = ds.label ?? ''
             }
 
+            // Apply
             echart?.setOption(option)
         }
     }
