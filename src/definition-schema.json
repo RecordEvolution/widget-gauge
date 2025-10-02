@@ -39,17 +39,38 @@
                         "order": 3
                     },
                     "precision": {
-                        "title": "Precision",
+                        "title": "Decimals",
                         "description": "The number of decimal places to show in the value. If not specified, precision is 0.",
                         "type": "number",
-                        "dataDrivenDisabled": false,
+                        "dataDrivenDisabled": true,
                         "order": 4
+                    },
+                    "multiChart": {
+                        "title": "Multi Chart",
+                        "description": "Draw multiple Charts based on the split column of a data table.",
+                        "type": "boolean",
+                        "dataDrivenDisabled": true,
+                        "order": 6
+                    },
+                    "value": {
+                        "title": "Value",
+                        "description": "The value of the gauge",
+                        "type": "number",
+                        "condition": {
+                            "relativePath": "../multiChart",
+                            "showIfValueIn": [false]
+                        },
+                        "order": 5
                     },
                     "data": {
                         "title": "Data",
                         "description": "Provide a list of values. Only the latest value is shown in the gauge unless you configure \"Advanced Settings\" below or use split data.",
                         "type": "array",
-                        "order": 4,
+                        "condition": {
+                            "relativePath": "../multiChart",
+                            "showIfValueIn": [true]
+                        },
+                        "order": 7,
                         "items": {
                             "type": "object",
                             "properties": {
@@ -78,7 +99,7 @@
                         "title": "Gauge Color Sections",
                         "description": "",
                         "type": "object",
-                        "order": 5,
+                        "order": 8,
                         "properties": {
                             "sectionLimits": {
                                 "title": "Section Limits",
@@ -108,7 +129,7 @@
                         "title": "Advanced Configuration",
                         "description": "",
                         "type": "object",
-                        "order": 6,
+                        "order": 9,
                         "properties": {
                             "averageLatest": {
                                 "title": "Average Latest Values",

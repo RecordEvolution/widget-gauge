@@ -292,6 +292,8 @@ export class WidgetGauge extends LitElement {
                         advanced: ds.advanced,
                         valueColor: ds.valueColor,
                         sections: ds.sections,
+                        multiChart: ds.multiChart,
+                        value: ds.value,
                         data: distincts.length === 1 ? ds.data : ds?.data?.filter((d) => d.pivot === piv)
                     }
                     this.dataSets.push(pds)
@@ -317,10 +319,16 @@ export class WidgetGauge extends LitElement {
             if (typeof ds.advanced?.averageLatest !== 'number' || isNaN(ds.advanced?.averageLatest))
                 ds.advanced.averageLatest = 1
             const data = ds?.data?.slice(-ds.advanced?.averageLatest || -1) ?? []
-            const values = (data?.map((d) => d.value)?.filter((p) => p !== undefined) ?? []) as number[]
-            const average = values.reduce((p, c) => p + c, 0) / values.length
-
-            ds.needleValue = isNaN(average) ? ds.sections?.sectionLimits?.[0] : average
+            console.log('multiChart', ds.multiChart)
+            if (!ds.multiChart) {
+                ds.needleValue = ds.value as number
+            } else {
+                const values = (data?.map((d) => d.value)?.filter((p) => p !== undefined) ?? []) as number[]
+                ds.needleValue = (values.reduce((p, c) => p + c, 0) / values.length) as number
+            }
+            ds.needleValue = isNaN(ds.needleValue as number)
+                ? ds.sections?.sectionLimits?.[0]
+                : ds.needleValue
 
             // The full range of the gauge
             ds.range =
