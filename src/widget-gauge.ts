@@ -319,7 +319,6 @@ export class WidgetGauge extends LitElement {
             if (typeof ds.advanced?.averageLatest !== 'number' || isNaN(ds.advanced?.averageLatest))
                 ds.advanced.averageLatest = 1
             const data = ds?.data?.slice(-ds.advanced?.averageLatest || -1) ?? []
-            console.log('multiChart', ds.multiChart)
             if (!ds.multiChart) {
                 ds.needleValue = ds.value as number
             } else {
