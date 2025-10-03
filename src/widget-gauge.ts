@@ -234,7 +234,8 @@ export class WidgetGauge extends LitElement {
 
         const maxSize = fits.reduce((p, c) => (c.size < p ? p : c.size), 0)
         const fit = fits.find((f) => f.size === maxSize)
-        const modifier = fit?.m ?? 0
+        if (!fit) return
+        const modifier = fit.m ?? 0
 
         // console.log(
         //     'FITS count',
@@ -249,6 +250,8 @@ export class WidgetGauge extends LitElement {
         //     this.boxes
         // )
         this.boxes = Array.from(this.gaugeContainer?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
+
+        this.gaugeContainer.style.gridTemplateColumns = `repeat(${fit.c}, 1fr)`
 
         this.boxes?.forEach((box) =>
             box.setAttribute('style', `width:${modifier * chartW}px; height:${modifier * (chartH - 27)}px`)
@@ -267,16 +270,18 @@ export class WidgetGauge extends LitElement {
         if (!this?.inputData) return
         this.inputData.dataseries
             ?.sort((a, b) => ((a.label ?? '') > (b.label ?? '') ? 1 : -1))
-            .forEach((ds) => {
+            .forEach((ds, idx) => {
                 // pivot data
                 const distincts = ds.multiChart
                     ? ([...new Set(ds.data?.map((d: Data) => d.pivot))].sort() as string[])
                     : ['']
                 distincts.forEach((piv) => {
                     const prefix = piv ?? ''
-                    const label = ds.label ?? ''
+                    let label = ds.label?.trim() ?? ''
+                    label = prefix + (!!prefix && !!label ? ' - ' : '') + label
+                    if (this.dataSets.some((ds) => ds.label === label)) label += ' ' + idx
                     const pds: any = {
-                        label: prefix + (!!prefix && !!label ? ' - ' : '') + label,
+                        label: label,
                         unit: ds.unit,
                         precision: ds.precision,
                         advanced: ds.advanced,
@@ -484,7 +489,7 @@ export class WidgetGauge extends LitElement {
             align-items: center;
         }
         .gauge-container {
-            display: flex;
+            display: grid;
             flex: 1;
             justify-content: center;
             align-items: center;

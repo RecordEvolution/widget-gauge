@@ -12,6 +12,32 @@
             "advanced": {
                 "averageLatest": 1
             }
+        },
+        {
+            "label": "Temperature",
+            "unit": "°C",
+            "precision": 1,
+            "value": 83,
+            "sections": {
+                "sectionLimits": [],
+                "backgroundColors": []
+            },
+            "advanced": {
+                "averageLatest": 1
+            }
+        },
+        {
+            "label": "Temperature",
+            "unit": "°C",
+            "precision": 1,
+            "value": 83,
+            "sections": {
+                "sectionLimits": [],
+                "backgroundColors": []
+            },
+            "advanced": {
+                "averageLatest": 1
+            }
         }
     ]
 }
