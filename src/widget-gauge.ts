@@ -1,5 +1,5 @@
-import { html, css, LitElement, PropertyValueMap } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { html, css, LitElement, PropertyValueMap, PropertyValues } from 'lit'
+import { customElement, property, query, state } from 'lit/decorators.js'
 import { GaugeChartConfiguration, SectionBackgroundColors } from './definition-schema.js'
 
 import * as echarts from 'echarts/core'
@@ -37,15 +37,17 @@ export class WidgetGauge extends LitElement {
     @state() private themeTitleColor?: string
     @state() private themeSubtitleColor?: string
 
+    @query('.gauge-container') private gaugeContainer?: HTMLDivElement
+    @query('.wrapper') private wrapper?: HTMLDivElement
+
     private resizeObserver: ResizeObserver
 
     boxes?: HTMLDivElement[]
-    origWidth: number = 0
-    origHeight: number = 0
+    origWidth: number = 600
+    origHeight: number = 350
     template: EChartsOption
     modifier: number = 1
     version: string = 'versionplaceholder'
-    gaugeContainer: HTMLDivElement | null | undefined
 
     constructor() {
         super()
@@ -160,9 +162,6 @@ export class WidgetGauge extends LitElement {
         if (changedProperties.has('inputData') && this.gaugeContainer) {
             this.transformData()
             this.setupCharts()
-            this.sizingSetup()
-            this.adjustSizes()
-            this.applyData()
         }
 
         if (changedProperties.has('theme')) {
@@ -170,20 +169,24 @@ export class WidgetGauge extends LitElement {
             this.deleteCharts()
             this.transformData()
             this.setupCharts()
-            this.sizingSetup()
             this.adjustSizes()
             this.applyData()
         }
         super.update(changedProperties)
     }
 
+    protected updated(changedProperties: PropertyValues): void {
+        if (changedProperties.has('inputData') && this.gaugeContainer) {
+            this.adjustSizes()
+            this.applyData()
+        }
+    }
+
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-        this.resizeObserver.observe(this.shadowRoot?.querySelector('.wrapper') as HTMLDivElement)
-        this.gaugeContainer = this.shadowRoot?.querySelector('.gauge-container')
+        if (this.wrapper) this.resizeObserver.observe(this.wrapper)
         this.registerTheme(this.theme)
         this.transformData()
         this.setupCharts()
-        this.sizingSetup()
         this.adjustSizes()
         this.applyData()
     }
@@ -197,21 +200,7 @@ export class WidgetGauge extends LitElement {
             cssTextColor || this.theme?.theme_object?.title?.subtextStyle?.color || this.themeTitleColor
 
         if (!theme || !theme.theme_object || !theme.theme_name) return
-
         echarts.registerTheme(theme.theme_name, theme.theme_object)
-    }
-
-    sizingSetup() {
-        if (this.origWidth !== 0 && this.origHeight !== 0) return
-
-        this.boxes =
-            Array.from(this?.shadowRoot?.querySelectorAll('.chart-wrapper') as NodeListOf<HTMLDivElement>) ??
-            []
-        if (!this.boxes.length) return
-        this.origWidth = 600
-        // this.boxes?.map((b) => b.getBoundingClientRect().width).reduce((p, c) => (c > p ? c : p), 0) ?? 0
-        this.origHeight = 230
-        // this.boxes?.map((b) => b.getBoundingClientRect().height).reduce((p, c) => (c > p ? c : p), 0) ?? 0
     }
 
     adjustSizes() {
@@ -259,7 +248,7 @@ export class WidgetGauge extends LitElement {
         //     (userWidth * userHeight).toFixed(0),
         //     this.boxes
         // )
-        this.boxes = Array.from(this?.shadowRoot?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
+        this.boxes = Array.from(this.gaugeContainer?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
 
         this.boxes?.forEach((box) =>
             box.setAttribute('style', `width:${modifier * chartW}px; height:${modifier * (chartH - 27)}px`)
@@ -280,8 +269,9 @@ export class WidgetGauge extends LitElement {
             ?.sort((a, b) => ((a.label ?? '') > (b.label ?? '') ? 1 : -1))
             .forEach((ds) => {
                 // pivot data
-                const distincts = [...new Set(ds?.data?.map((d: Data) => d.pivot))]
-
+                const distincts = ds.multiChart
+                    ? ([...new Set(ds.data?.map((d: Data) => d.pivot))].sort() as string[])
+                    : ['']
                 distincts.forEach((piv) => {
                     const prefix = piv ?? ''
                     const label = ds.label ?? ''
@@ -309,7 +299,6 @@ export class WidgetGauge extends LitElement {
         })
 
         this.dataSets.sort((a, b) => ((a.label as string) > (b.label as string) ? 1 : -1))
-        this.requestUpdate()
 
         for (const ds of this.dataSets) {
             // compute derivative values
@@ -354,10 +343,10 @@ export class WidgetGauge extends LitElement {
             ga.data[0].name = ds.unit
             // unit style
             ga.title.fontSize = 20 * modifier
-            ga.title.color = ds.valueColor ?? this.themeTitleColor
+            ga.title.color = ds.valueColor || this.themeTitleColor
             ga.title.opacity = 1
             // value style
-            ga.detail.color = ds.valueColor ?? this.themeTitleColor
+            ga.detail.color = ds.valueColor || this.themeTitleColor
             ga.detail.opacity = 1
             ga.detail.fontSize = 40 * modifier
 
@@ -454,7 +443,7 @@ export class WidgetGauge extends LitElement {
             newCanvas.setAttribute('class', 'chart')
             newCanvas.setAttribute(
                 'style',
-                `min-width: 600px; min-height: 250px; width: 600px; height: 250px;`
+                `min-width: ${this.origWidth}; min-height: ${this.origHeight}; width: ${this.origWidth}; height: ${this.origHeight};`
             )
 
             newWrapper!.appendChild(newTitle)
@@ -524,11 +513,6 @@ export class WidgetGauge extends LitElement {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-        }
-
-        .chart {
-            width: 600px; /* will be overriden by adjustSizes */
-            height: 230px;
         }
 
         .no-data {

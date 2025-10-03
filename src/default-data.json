@@ -4,11 +4,7 @@
             "label": "Temperature",
             "unit": "°C",
             "precision": 1,
-            "data": [
-                {
-                    "value": 83
-                }
-            ],
+            "value": 83,
             "sections": {
                 "sectionLimits": [],
                 "backgroundColors": []
