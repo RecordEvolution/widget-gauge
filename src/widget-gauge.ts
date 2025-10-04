@@ -514,7 +514,11 @@ export class WidgetGauge extends LitElement {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            line-height: 1;
+            line-height: 0.8;
+        }
+
+        .title {
+            line-height: 1.5;
         }
         p {
             margin: 10px 0 0 0;
@@ -544,7 +548,7 @@ export class WidgetGauge extends LitElement {
                 style="background-color: ${this.themeBgColor}; color: ${this.themeTitleColor}"
             >
                 <header class="paging" ?active=${this.inputData?.title || this.inputData?.subTitle}>
-                    <h3 class="paging" ?active=${this.inputData?.title}>${this.inputData?.title}</h3>
+                    <h3 class="paging title" ?active=${this.inputData?.title}>${this.inputData?.title}</h3>
                     <p
                         class="paging"
                         ?active=${this.inputData?.subTitle}
