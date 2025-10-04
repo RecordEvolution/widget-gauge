@@ -45,6 +45,7 @@ export class WidgetGauge extends LitElement {
     boxes?: HTMLDivElement[]
     origWidth: number = 600
     origHeight: number = 350
+    textContainerHeight: number = 36
     template: EChartsOption
     modifier: number = 1
     version: string = 'versionplaceholder'
@@ -254,7 +255,10 @@ export class WidgetGauge extends LitElement {
         this.gaugeContainer.style.gridTemplateColumns = `repeat(${fit.c}, 1fr)`
 
         this.boxes?.forEach((box) =>
-            box.setAttribute('style', `width:${modifier * chartW}px; height:${modifier * (chartH - 27)}px`)
+            box.setAttribute(
+                'style',
+                `width:${modifier * chartW}px; height:${modifier * (chartH - this.textContainerHeight)}px`
+            )
         )
 
         this.modifier = modifier
@@ -347,13 +351,14 @@ export class WidgetGauge extends LitElement {
             ga.data[0].value = ds.needleValue
             ga.data[0].name = ds.unit
             // unit style
-            ga.title.fontSize = 20 * modifier
+
+            ga.title.fontSize = 32 * modifier
             ga.title.color = ds.valueColor || this.themeTitleColor
             ga.title.opacity = 1
             // value style
             ga.detail.color = ds.valueColor || this.themeTitleColor
             ga.detail.opacity = 1
-            ga.detail.fontSize = 40 * modifier
+            ga.detail.fontSize = 60 * modifier
 
             ga.detail.formatter = (val: number) =>
                 isNaN(val) ? '-' : val.toFixed(Math.floor(ds.precision ?? 0))
@@ -388,7 +393,7 @@ export class WidgetGauge extends LitElement {
             ga2.axisLine.lineStyle.color = colorSections?.length
                 ? colorSections
                 : ga2.axisLine.lineStyle.color
-            ga2.axisLabel.fontSize = 20 * modifier
+            ga2.axisLabel.fontSize = 24 * modifier
             // ga2.axisLabel.color = ds.valueColor
             ga2.axisLabel.distance = -24 * modifier
             ga2.splitLine.length = 16 * modifier
@@ -407,9 +412,9 @@ export class WidgetGauge extends LitElement {
 
             const titleElement = this.canvasList.get(ds.label)?.title
             if (titleElement) {
-                titleElement.style.fontSize = String(20 * modifier) + 'px'
+                titleElement.style.fontSize = String(36 * modifier) + 'px'
                 titleElement.style.maxWidth = String(300 * modifier) + 'px'
-                titleElement.style.height = String(27 * modifier) + 'px'
+                titleElement.style.height = String(this.textContainerHeight * modifier) + 'px'
                 titleElement.textContent = ds.label ?? ''
             }
 
@@ -509,6 +514,7 @@ export class WidgetGauge extends LitElement {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            line-height: 1;
         }
         p {
             margin: 10px 0 0 0;
