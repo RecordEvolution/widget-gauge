@@ -413,7 +413,7 @@ export class WidgetGauge extends LitElement {
             const titleElement = this.canvasList.get(ds.label)?.title
             if (titleElement) {
                 titleElement.style.fontSize = String(36 * modifier) + 'px'
-                titleElement.style.maxWidth = String(300 * modifier) + 'px'
+                titleElement.style.maxWidth = String(550 * modifier) + 'px'
                 titleElement.style.height = String(this.textContainerHeight * modifier) + 'px'
                 titleElement.textContent = ds.label ?? ''
             }
@@ -510,7 +510,6 @@ export class WidgetGauge extends LitElement {
         }
         h3 {
             margin: 0;
-            max-width: 300px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
