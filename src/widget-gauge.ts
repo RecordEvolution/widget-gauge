@@ -329,7 +329,7 @@ export class WidgetGauge extends LitElement {
 
             // The full range of the gauge
             ds.range =
-                (ds.sections?.sectionLimits?.[ds.sections?.sectionLimits?.length - 1].limit || 100) -
+                (ds.sections?.sectionLimits?.[ds.sections?.sectionLimits?.length - 1]?.limit || 100) -
                 (ds.sections?.gaugeMinValue ?? 0)
             if (isNaN(ds.range as number)) ds.range = 100
             // ds.ranges = ds.sections?.sectionLimits?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
@@ -368,7 +368,7 @@ export class WidgetGauge extends LitElement {
             // Axis
             const sectionLimits = !ds.sections?.sectionLimits?.length
                 ? [40, 80, 100]
-                : ds.sections?.sectionLimits.map((l) => l.limit).filter((l) => l !== undefined)
+                : ds.sections?.sectionLimits.map((l) => l?.limit).filter((l) => l !== undefined)
             ga2.max = sectionLimits?.length ? Math.max(...sectionLimits) : 100
             ga.min = ga2.min = ds.sections?.gaugeMinValue ?? 0
             ga.max = ga2.max
