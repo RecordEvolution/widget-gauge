@@ -101,27 +101,36 @@
                         "type": "object",
                         "order": 8,
                         "properties": {
-                            "sectionLimits": {
-                                "title": "Section Limits",
-                                "description": "The limits of the gauge sections. Starting from the min value, ending with the max value.",
-                                "type": "array",
+                            "gaugeMinValue": {
+                                "title": "Gauge Minimum Value",
+                                "description": "The minimum value of the gauge. If not specified 0 is used.",
+                                "type": "number",
                                 "dataDrivenDisabled": true,
-                                "order": 4,
-                                "items": {
-                                    "type": "number",
-                                    "dataDrivenDisabled": true
-                                }
+                                "order": 1
                             },
-                            "backgroundColors": {
-                                "title": "Section background colors",
-                                "description": "Background color for each section. This Array is one shorter than the number of sections.",
+                            "sectionLimits": {
+                                "title": "Section Upper Limits",
+                                "description": "The upper limits of the gauge sections and the color for each section.",
                                 "type": "array",
                                 "dataDrivenDisabled": true,
+                                "order": 2,
                                 "items": {
-                                    "type": "color",
-                                    "dataDrivenDisabled": true
-                                },
-                                "order": 5
+                                    "type": "object",
+                                    "properties": {
+                                        "limit": {
+                                            "title": "Upper Limit",
+                                            "type": "number",
+                                            "dataDrivenDisabled": true,
+                                            "order": 1
+                                        },
+                                        "sectionColor": {
+                                            "title": "Section Color",
+                                            "type": "color",
+                                            "dataDrivenDisabled": true,
+                                            "order": 2
+                                        }
+                                    }
+                                }
                             }
                         }
                     },

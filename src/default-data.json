@@ -6,8 +6,7 @@
             "precision": 1,
             "value": 83,
             "sections": {
-                "sectionLimits": [],
-                "backgroundColors": []
+                "gaugeMinValue": 0
             },
             "advanced": {
                 "averageLatest": 1
