@@ -46,12 +46,12 @@ export type Data = {
  * The minimum value of the gauge. If not specified 0 is used.
  */
 export type GaugeMinimumValue = number;
-export type LimitValue = number;
+export type UpperLimit = number;
 /**
  * The upper limits of the gauge sections and the color for each section.
  */
 export type SectionUpperLimits = {
-    limit?: LimitValue;
+    limit?: UpperLimit;
     sectionColor?: SectionColor;
     [k: string]: unknown;
 }[];
