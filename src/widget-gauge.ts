@@ -360,13 +360,18 @@ export class WidgetGauge extends LitElement {
             const themeColors = this.theme?.theme_object?.color ?? defaultColors
             const gaugeMin = ds.sections?.gaugeMinValue ?? 0
 
-            // Filter out entries with null/undefined limits, keeping limits and colors in sync
+            // Filter out entries with null/undefined/empty limits, keeping limits and colors in sync
             const validSections = (ds.sections?.sectionLimits ?? [])
-                .map((l, i) => ({
-                    limit: l?.limit,
-                    color: l?.sectionColor || themeColors[i % themeColors.length]
-                }))
-                .filter((s): s is { limit: number; color: SectionColor } => s.limit != null)
+                .map((l, i) => {
+                    const limit = l?.limit as string | number | null | undefined
+                    return {
+                        limit: limit === '' || limit == null ? undefined : Number(limit),
+                        color: l?.sectionColor || themeColors[i % themeColors.length]
+                    }
+                })
+                .filter(
+                    (s): s is { limit: number; color: SectionColor } => s.limit != null && !isNaN(s.limit)
+                )
 
             // Determine ascending/descending based on gaugeMin vs first limit
             const isAscending = !validSections.length || gaugeMin <= validSections[0].limit
@@ -397,6 +402,15 @@ export class WidgetGauge extends LitElement {
                 })
                 .filter(([s]) => !isNaN(s) && s >= 0)
 
+            console.log(
+                'Gauge sections',
+                ds.label,
+                gaugeMin,
+                gaugeMax,
+                sections,
+                sectionLimits,
+                colorSections
+            )
             ga2.axisLine.lineStyle.width = 8 * modifier
             if (colorSections.length) ga2.axisLine.lineStyle.color = colorSections
             ga2.axisLabel.fontSize = 24 * modifier
