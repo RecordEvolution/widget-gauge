@@ -102,15 +102,15 @@
                         "order": 8,
                         "properties": {
                             "gaugeMinValue": {
-                                "title": "Gauge Minimum Value",
-                                "description": "The minimum value of the gauge. If not specified 0 is used.",
+                                "title": "Gauge Start Value",
+                                "description": "The start value of the gauge. If not specified 0 is used.",
                                 "type": "number",
                                 "dataDrivenDisabled": true,
                                 "order": 1
                             },
                             "sectionLimits": {
-                                "title": "Section Upper Limits",
-                                "description": "The upper limits of the gauge sections and the color for each section.",
+                                "title": "Section Right Limits",
+                                "description": "The right limits of the gauge sections and the color for that section.",
                                 "type": "array",
                                 "dataDrivenDisabled": true,
                                 "order": 2,
@@ -118,7 +118,7 @@
                                     "type": "object",
                                     "properties": {
                                         "limit": {
-                                            "title": "Upper Limit",
+                                            "title": "Right Limit",
                                             "type": "number",
                                             "dataDrivenDisabled": true,
                                             "order": 1

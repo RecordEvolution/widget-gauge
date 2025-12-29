@@ -43,15 +43,15 @@ export type Data = {
     [k: string]: unknown;
 }[];
 /**
- * The minimum value of the gauge. If not specified 0 is used.
+ * The start value of the gauge. If not specified 0 is used.
  */
-export type GaugeMinimumValue = number;
-export type UpperLimit = number;
+export type GaugeStartValue = number;
+export type RightLimit = number;
 /**
- * The upper limits of the gauge sections and the color for each section.
+ * The right limits of the gauge sections and the color for that section.
  */
-export type SectionUpperLimits = {
-    limit?: UpperLimit;
+export type SectionRightLimits = {
+    limit?: RightLimit;
     sectionColor?: SectionColor;
     [k: string]: unknown;
 }[];
@@ -86,8 +86,8 @@ export interface ValueColor {
     [k: string]: unknown;
 }
 export interface GaugeColorSections {
-    gaugeMinValue?: GaugeMinimumValue;
-    sectionLimits?: SectionUpperLimits;
+    gaugeMinValue?: GaugeStartValue;
+    sectionLimits?: SectionRightLimits;
     [k: string]: unknown;
 }
 export interface SectionColor {

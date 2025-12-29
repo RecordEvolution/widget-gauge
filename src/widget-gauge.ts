@@ -327,13 +327,6 @@ export class WidgetGauge extends LitElement {
                 ? (ds.sections?.gaugeMinValue ?? 0)
                 : ds.needleValue
 
-            // The full range of the gauge
-            ds.range =
-                (ds.sections?.sectionLimits?.[ds.sections?.sectionLimits?.length - 1]?.limit || 100) -
-                (ds.sections?.gaugeMinValue ?? 0)
-            if (isNaN(ds.range as number)) ds.range = 100
-            // ds.ranges = ds.sections?.sectionLimits?.map((v, i, a) => v - (a?.[i - 1] ?? 0)).slice(1) ?? []
-
             const echart = this.canvasList.get(ds.label)?.echart
             const option = echart?.getOption() ?? window.structuredClone(this.template)
             const seriesArr = option.series as GaugeSeriesOption[]
@@ -362,34 +355,50 @@ export class WidgetGauge extends LitElement {
 
             ga.detail.formatter = (val: number) =>
                 isNaN(val) ? '-' : val.toFixed(Math.floor(ds.precision ?? 0))
-            // ga.anchor.itemStyle.color = ds.valueColor
-            // ga.pointer.itemStyle.color = ds.valueColor
-
             // Axis
-            const sectionLimits = !ds.sections?.sectionLimits?.length
-                ? [40, 80, 100]
-                : ds.sections?.sectionLimits.map((l) => l?.limit).filter((l) => l !== undefined)
-            ga2.max = sectionLimits?.length ? Math.max(...sectionLimits) : 100
-            ga.min = ga2.min = ds.sections?.gaugeMinValue ?? 0
-            ga.max = ga2.max
+            const defaultColors = ['#bf444c', '#d88273', '#f6efa6']
+            const themeColors = this.theme?.theme_object?.color ?? defaultColors
+            const gaugeMin = ds.sections?.gaugeMinValue ?? 0
 
-            const tcolors = this.theme?.theme_object?.color
-            const bcolors: SectionColor[] = !ds.sections?.sectionLimits?.length
-                ? (tcolors?.slice(0, 3) ?? ['#bf444c', '#d88273', '#f6efa6'])
-                : ds.sections?.sectionLimits.map((l) => l.sectionColor).filter((c) => c !== undefined)
+            // Filter out entries with null/undefined limits, keeping limits and colors in sync
+            const validSections = (ds.sections?.sectionLimits ?? [])
+                .map((l, i) => ({
+                    limit: l?.limit,
+                    color: l?.sectionColor || themeColors[i % themeColors.length]
+                }))
+                .filter((s): s is { limit: number; color: SectionColor } => s.limit != null)
 
-            const colors = bcolors?.map((b, i) => b || tcolors[i % (tcolors?.length ?? 0)]) ??
-                tcolors?.slice(0, 3) ?? ['#bf444c', '#d88273', '#f6efa6']
+            // Determine ascending/descending based on gaugeMin vs first limit
+            const isAscending = !validSections.length || gaugeMin <= validSections[0].limit
 
-            // percentages of the sections paired with the colors
-            const colorSections = colors
-                ?.map((b, i) => [(sectionLimits?.[i] - ga.min) / (ds.range as number), b])
-                .filter(([s]) => !isNaN(s as number)) ?? [1 / 3, 1 / 3, 1 / 3]
+            // Filter to keep only sections that maintain monotonic order
+            const sections = validSections.filter((s, i, arr) => {
+                if (i === 0) return true
+                return isAscending ? s.limit > arr[i - 1].limit : s.limit < arr[i - 1].limit
+            })
+
+            const sectionLimits = sections.length ? sections.map((s) => s.limit) : [40, 80, 100]
+            const colors: SectionColor[] = sections.length
+                ? sections.map((s) => s.color)
+                : themeColors.slice(0, 3)
+
+            const gaugeMax = sectionLimits?.[sectionLimits.length - 1] ?? 100
+            ds.range = Math.abs(gaugeMax - gaugeMin)
+
+            ga.min = ga2.min = gaugeMin
+            ga.max = ga2.max = gaugeMax
+
+            // percentages of the sections paired with the colors (must be strictly ascending for ECharts)
+            const colorSections = sectionLimits
+                .map((limit, i) => {
+                    const pct = Math.abs(limit - gaugeMin) / (ds.range as number)
+                    const color = colors[i]
+                    return [pct, color] as [number, SectionColor]
+                })
+                .filter(([s]) => !isNaN(s) && s >= 0)
 
             ga2.axisLine.lineStyle.width = 8 * modifier
-            ga2.axisLine.lineStyle.color = colorSections?.length
-                ? colorSections
-                : ga2.axisLine.lineStyle.color
+            if (colorSections.length) ga2.axisLine.lineStyle.color = colorSections
             ga2.axisLabel.fontSize = 24 * modifier
             // ga2.axisLabel.color = ds.valueColor
             ga2.axisLabel.distance = -24 * modifier
@@ -399,7 +408,10 @@ export class WidgetGauge extends LitElement {
             // Progress
             let progressColor = colors?.[colors.length - 1]
             for (const [i, s] of sectionLimits?.entries() ?? []) {
-                if (s > (ds.needleValue as number)) {
+                const inSection = isAscending
+                    ? s > (ds.needleValue as number)
+                    : s < (ds.needleValue as number)
+                if (inSection) {
                     progressColor = colors?.[i] ?? colors?.[0]
                     break
                 }
