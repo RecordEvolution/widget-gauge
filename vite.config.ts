@@ -10,7 +10,6 @@ export default defineConfig({
         port: 8000
     },
     resolve: {
-        conditions: ['browser', 'development'],
         alias: {
             tslib: 'tslib/tslib.es6.js'
         }

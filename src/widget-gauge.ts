@@ -16,8 +16,10 @@ type Theme = {
     theme_name: string
     theme_object: any
 }
+
+export
 @customElement('widget-gauge-versionplaceholder')
-export class WidgetGauge extends LitElement {
+class WidgetGauge extends LitElement {
     @property({ type: Object })
     inputData?: GaugeChartConfiguration
 
