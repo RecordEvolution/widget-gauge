@@ -17,6 +17,9 @@ export default defineConfig({
     optimizeDeps: {
         include: ['echarts', 'zrender', 'tslib']
     },
+    define: {
+        'process.env.NODE_ENV': JSON.stringify('production')
+    },
     plugins: [
         replace({
             versionplaceholder: pkg.version,
