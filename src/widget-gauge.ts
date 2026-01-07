@@ -58,13 +58,6 @@ export class WidgetGauge extends LitElement {
         })
 
         this.template = {
-            title: {
-                text: 'Gauge',
-                left: 'center',
-                textStyle: {
-                    fontSize: 10
-                }
-            },
             series: [
                 {
                     type: 'gauge',
@@ -135,12 +128,7 @@ export class WidgetGauge extends LitElement {
                             color: 'auto'
                         }
                     },
-                    title: {
-                        text: 'Gauge B',
-                        offsetCenter: [0, '-35%'],
-                        fontSize: 20,
-                        show: true
-                    },
+
                     axisLabel: {
                         distance: -20,
                         color: '#666',
@@ -201,7 +189,23 @@ export class WidgetGauge extends LitElement {
             cssTextColor || this.theme?.theme_object?.title?.subtextStyle?.color || this.themeTitleColor
 
         if (!theme || !theme.theme_object || !theme.theme_name) return
-        echarts.registerTheme(theme.theme_name, theme.theme_object)
+
+        // Filter out component keys that would trigger warnings about unregistered components
+        const excludeKeys = [
+            'title',
+            'legend',
+            'toolbox',
+            'dataZoom',
+            'visualMap',
+            'timeline',
+            'geo',
+            'parallel',
+            'markPoint'
+        ]
+        const filteredTheme = Object.fromEntries(
+            Object.entries(theme.theme_object).filter(([key]) => !excludeKeys.includes(key))
+        )
+        echarts.registerTheme(theme.theme_name, filteredTheme)
     }
 
     adjustSizes() {
@@ -402,15 +406,6 @@ export class WidgetGauge extends LitElement {
                 })
                 .filter(([s]) => !isNaN(s) && s >= 0)
 
-            console.log(
-                'Gauge sections',
-                ds.label,
-                gaugeMin,
-                gaugeMax,
-                sections,
-                sectionLimits,
-                colorSections
-            )
             ga2.axisLine.lineStyle.width = 8 * modifier
             if (colorSections.length) ga2.axisLine.lineStyle.color = colorSections
             ga2.axisLabel.fontSize = 24 * modifier
@@ -506,7 +501,7 @@ export class WidgetGauge extends LitElement {
             flex-direction: column;
             height: 100%;
             width: 100%;
-            padding: 16px;
+            padding: 2%;
             box-sizing: border-box;
             gap: 12px;
         }
