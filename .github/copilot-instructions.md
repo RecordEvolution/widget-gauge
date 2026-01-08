@@ -1,67 +1,45 @@
 # Copilot Instructions for widget-gauge
 
-## Project Overview
+## Architecture Overview
 
-Lit-based web component rendering ECharts gauge charts for the IronFlock IoT dashboard platform. Part of a multi-widget ecosystem where each widget follows identical patterns.
+IronFlock widget: Lit 3.x web component rendering ECharts gauge charts. Part of a multi-widget ecosystem (`widget-*` repos) sharing identical patterns.
 
-## Tech Stack & Architecture
+**Key files:**
+- `src/widget-gauge.ts` - Main LitElement component
+- `src/definition-schema.json` - JSON Schema → auto-generates dashboard forms
+- `src/definition-schema.d.ts` - Generated types (never edit manually)
+- `demo/index.html` - Dev harness with auto-randomizing test data
 
-- **Framework**: Lit 3.x (LitElement web components)
-- **Charting**: ECharts 6.x with modular/tree-shaken imports
-- **Build**: Vite 7.x for dev server and production builds
-- **Types**: TypeScript 5.x + JSON Schema → TypeScript codegen
+## Critical: Version-Tagged Custom Elements
 
-### File Structure Pattern (consistent across all widgets)
-
-```
-src/
-├── widget-gauge.ts        # Main LitElement component
-├── definition-schema.json # JSON Schema defining inputData structure
-├── definition-schema.d.ts # Generated types (run: npm run types)
-└── default-data.json      # Sample data for development
-demo/
-└── index.html             # Development test harness
-```
-
-## Critical Conventions
-
-### Version-Tagged Custom Elements
-
-The custom element tag includes the version: `widget-gauge-{version}`. The placeholder `versionplaceholder` in source code is replaced at build time via Rollup's replace plugin.
-
+Source uses `versionplaceholder` replaced at build time via `@rollup/plugin-replace` in `vite.config.ts`:
 ```typescript
-// Source code uses placeholder
-@customElement('widget-gauge-versionplaceholder')
-
-// After build becomes: widget-gauge-1.7.28
+@customElement('widget-gauge-versionplaceholder')  // Becomes: widget-gauge-1.7.28
 ```
+**Never hardcode versions** - the demo imports `package.json` to construct the tag dynamically.
 
-### Data Schema Workflow
+## Schema-Driven Development
 
-1. Edit `src/definition-schema.json` to change widget configuration
-2. Run `npm run types` to regenerate `definition-schema.d.ts`
-3. Import and use types in the component
+The dashboard auto-generates config UI from `definition-schema.json`. Custom extensions:
+- `"type": "color"` → color picker
+- `"order": N` → field ordering  
+- `"dataDrivenDisabled": true` → field cannot be data-bound from IoT sources
+- `"condition": { "relativePath": "../field", "showIfValueIn": [values] }` → conditional visibility
 
-The JSON Schema uses custom extensions:
+**Workflow:** Edit schema → `npm run types` → import generated types in component.
 
-- `"type": "color"` → renders color picker in dashboard
-- `"order": N` → field ordering in auto-generated forms
-- `"dataDrivenDisabled": true` → field cannot be data-bound
-- `"condition"` → conditional field visibility
-
-### Component API Pattern
-
-All widgets expose two main properties:
+## Component API (universal across all widgets)
 
 ```typescript
 @property({ type: Object }) inputData?: GaugeChartConfiguration  // From schema
 @property({ type: Object }) theme?: { theme_name: string, theme_object: any }
 ```
 
-### ECharts Integration
+Theme files in `demo/themes/` (light.json, chalk.json, vintage.json) for testing.
 
-Use modular imports for tree-shaking:
+## ECharts: Modular Imports Required
 
+Always use tree-shaken imports to minimize bundle (~625KB with ECharts):
 ```typescript
 import * as echarts from 'echarts/core'
 import { GaugeChart } from 'echarts/charts'
@@ -69,30 +47,27 @@ import { CanvasRenderer } from 'echarts/renderers'
 echarts.use([GaugeChart, CanvasRenderer])
 ```
 
-## Development Workflow
+## Commands
 
-```bash
-npm run start    # Dev server at localhost:8000/demo/
-npm run build    # Production build to dist/
-npm run types    # Regenerate TS types from JSON schema
-npm run release  # Build + bump patch version + push + tag
-npm run link     # Link for local dev with RESWARM/frontend
-```
+| Command | Purpose |
+|---------|---------|
+| `npm run start` | Dev server at localhost:8000/demo/ |
+| `npm run build` | Production build to dist/ |
+| `npm run types` | Regenerate types from schema (run after schema changes) |
+| `npm run release` | Build → bump patch → git push → tag |
+| `npm run link` | Link to local RESWARM/frontend for integration testing |
 
-## Build Configuration Notes
+## Build Config Notes (vite.config.ts)
 
-- `process.env.NODE_ENV` must be defined for ECharts production mode
-- `tslib` alias required for ESM compatibility: `tslib: 'tslib/tslib.es6.js'`
-- Bundle size ~625KB (ECharts core + zrender is ~450KB)
+- `process.env.NODE_ENV` must be `'production'` for ECharts optimization
+- `tslib` alias needed: `tslib: 'tslib/tslib.es6.js'`
 
-## Platform Integration
-
-After releasing, register new version with IronFlock:
+## Platform Registration (post-release)
 
 ```sql
 select swarm.f_update_widget_master('{"package_name": "widget-gauge", "version": "X.Y.Z"}'::jsonb);
 ```
 
-## Testing Changes
+## Testing Tips
 
-The demo page at `/demo/index.html` auto-randomizes data values for testing. Modify `keyPathsToRandomize` array to test specific properties.
+In `demo/index.html`, modify `keyPathsToRandomize` array to auto-test specific data paths every second.

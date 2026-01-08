@@ -492,6 +492,7 @@ class WidgetGauge extends LitElement {
             box-sizing: border-box;
             position: relative;
             margin: auto;
+            container-type: size;
         }
 
         .paging:not([active]) {
@@ -503,7 +504,7 @@ class WidgetGauge extends LitElement {
             flex-direction: column;
             height: 100%;
             width: 100%;
-            padding: 2%;
+            padding: 2cqh 2cqw;
             box-sizing: border-box;
             gap: 12px;
         }

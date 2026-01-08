@@ -9,14 +9,6 @@ export default defineConfig({
         open: '/demo/',
         port: 8000
     },
-    resolve: {
-        alias: {
-            tslib: 'tslib/tslib.es6.js'
-        }
-    },
-    optimizeDeps: {
-        include: ['echarts', 'zrender', 'tslib']
-    },
     define: {
         'process.env.NODE_ENV': JSON.stringify('production')
     },
@@ -34,6 +26,7 @@ export default defineConfig({
         },
         sourcemap: true,
         rollupOptions: {
+            external: [/^echarts/],
             output: {
                 banner: '/* @license Copyright (c) 2025 Record Evolution GmbH. All rights reserved.*/'
             }
