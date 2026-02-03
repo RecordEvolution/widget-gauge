@@ -5,36 +5,48 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+/**
+ * The main heading displayed above the gauge(s). Use to describe what metric is being shown (e.g., 'CPU Temperature', 'Tank Level').
+ */
 export type Title = string;
+/**
+ * Secondary text displayed below the title. Use for additional context like location, device name, or measurement conditions.
+ */
 export type Subtitle = string;
+/**
+ * The name displayed below or inside the gauge to identify what value it shows. Appears in legends when multiple gauges are present.
+ */
 export type Label = string;
 /**
- * The unit of the values. e.g. °C or km/h
+ * The measurement unit displayed after the value (e.g., '°C', 'km/h', '%', 'PSI'). Keep short for better display.
  */
 export type Unit = string;
 /**
- * The number of decimal places to show in the value. If not specified, precision is 0.
+ * Number of decimal places to display (e.g., 0 for whole numbers, 1 for 23.5, 2 for 23.45). Default is 0.
  */
 export type Decimals = number;
 /**
- * Draw multiple Charts based on the split column of a data table.
+ * When enabled, automatically creates multiple gauges based on distinct values in a pivot column. Use when you have one data table containing values for multiple entities (e.g., temperatures for multiple devices).
  */
 export type MultiChart = boolean;
 /**
- * The value of the gauge
+ * The numeric value to display on the gauge. Can be bound to a data column for real-time updates. Used when Multi Chart is disabled.
  */
 export type Value = number;
 /**
- * This should be an ISO String date like 2023-11-04T22:47:52.351152+00:00. Will only be used to detect data age of data.
+ * ISO 8601 timestamp string (e.g., '2023-11-04T22:47:52.351152+00:00'). Used to detect data age and apply maxLatency filtering if configured.
  */
 export type Timestamp = string;
+/**
+ * The numeric measurement value for this data point.
+ */
 export type Value1 = number;
 /**
- * You can specify a table column to autogenerate dataseries for each distinct entry in this column. E.g. if you have a table with columns [city, timestamp, temperature] and specify ''city'' as split column, then you will get a gauge for each city.
+ * Column value used to split data into multiple gauges. Each unique value creates a separate gauge (e.g., device_id creates one gauge per device).
  */
 export type SplitDataBy = string;
 /**
- * Provide a list of values. Only the latest value is shown in the gauge unless you configure "Advanced Settings" below or use split data.
+ * Data array for Multi Chart mode. Only the latest value per pivot group is displayed unless averaging is configured. Provide timestamp for data freshness indication.
  */
 export type Data = {
     tsp?: Timestamp;
@@ -43,12 +55,15 @@ export type Data = {
     [k: string]: unknown;
 }[];
 /**
- * The start value of the gauge. If not specified 0 is used.
+ * The minimum value shown on the gauge scale (left-most point). Default is 0. Set to negative for metrics that can go below zero.
  */
 export type GaugeStartValue = number;
+/**
+ * The upper boundary value for this color section. The last section's limit defines the gauge maximum.
+ */
 export type RightLimit = number;
 /**
- * The right limits of the gauge sections and the color for that section.
+ * Define color zones by specifying the upper boundary and color for each section. Sections are drawn from the gauge minimum to the first limit, then between consecutive limits.
  */
 export type SectionRightLimits = {
     limit?: RightLimit;
@@ -56,13 +71,16 @@ export type SectionRightLimits = {
     [k: string]: unknown;
 }[];
 /**
- * Calculate the average over the given number of newest values. (If you use 'split by', then per each of the split dataseries.) If not specified then the latest value is shown without modification.
+ * Calculate a rolling average over the specified number of most recent data points. Useful for smoothing noisy sensor data. Leave empty to show raw latest value.
  */
 export type AverageLatestValues = number;
 /**
- * If you provide timestamp data, the delivered value is only shown in the gauge when the age of the data is not older than the given maximum Latency in seconds.
+ * Maximum age (in seconds) for data to be displayed. If the latest data point's timestamp is older than this threshold, the gauge shows no value or a stale indicator. Useful for detecting sensor offline conditions.
  */
 export type MaximumLatencyInSeconds = number;
+/**
+ * Array of gauge configurations. Each entry creates a separate gauge dial that can display different metrics or the same metric for different entities (via pivot).
+ */
 export type Gauges = {
     label?: Label;
     valueColor?: ValueColor;
@@ -76,23 +94,38 @@ export type Gauges = {
     [k: string]: unknown;
 }[];
 
+/**
+ * A circular gauge widget for displaying single numeric values within a defined range. Use this widget to show KPIs, sensor readings, progress indicators, or any metric that benefits from a visual representation against minimum and maximum boundaries. Supports color-coded sections to indicate value zones (e.g., normal/warning/critical), multiple gauges in one widget, and automatic pivot-based generation from data columns. Ideal for real-time monitoring dashboards showing temperature, speed, utilization, or similar bounded metrics.
+ */
 export interface GaugeChartConfiguration {
     title?: Title;
     subTitle?: Subtitle;
     dataseries?: Gauges;
     [k: string]: unknown;
 }
+/**
+ * The color of the numeric value text displayed on the gauge. Use a contrasting color for readability.
+ */
 export interface ValueColor {
     [k: string]: unknown;
 }
+/**
+ * Configure the gauge scale range and color zones to indicate value severity or status levels.
+ */
 export interface GaugeColorSections {
     gaugeMinValue?: GaugeStartValue;
     sectionLimits?: SectionRightLimits;
     [k: string]: unknown;
 }
+/**
+ * The fill color for this section of the gauge arc. Use semantic colors like green for normal, yellow for warning, red for critical.
+ */
 export interface SectionColor {
     [k: string]: unknown;
 }
+/**
+ * Additional settings for data processing and display behavior.
+ */
 export interface AdvancedConfiguration {
     averageLatest?: AverageLatestValues;
     maxLatency?: MaximumLatencyInSeconds;
