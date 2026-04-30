@@ -10,6 +10,9 @@ export default defineConfig({
         port: 8000
     },
     resolve: {
+        alias: {
+            tslib: 'tslib/tslib.es6.js'
+        },
         conditions: ['browser']
     },
     define: {
@@ -31,7 +34,7 @@ export default defineConfig({
         rollupOptions: {
             external: [/^echarts/],
             output: {
-                banner: '/* @license Copyright (c) 2025 Record Evolution GmbH. All rights reserved.*/'
+                banner: '/* @license Copyright (c) 2026 Record Evolution GmbH. All rights reserved.*/'
             }
         }
     }

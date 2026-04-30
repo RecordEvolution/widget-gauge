@@ -452,7 +452,15 @@ class WidgetGauge extends LitElement {
 
     setupCharts() {
         if (!this.gaugeContainer) return
+        // const { width, height } = this.gaugeContainer.getBoundingClientRect()
+        // if (!width || !height) return
         // remove the gauge canvases of non provided data series
+        // console.log(
+        //     'Setting up charts',
+        //     this.dataSets,
+        //     this.canvasList,
+        //     this.gaugeContainer.getBoundingClientRect()
+        // )
         this.canvasList.forEach((canvasObj, label) => {
             const ex = this.dataSets.find((ds) => ds.label === label)
             if (!ex) {
@@ -473,13 +481,12 @@ class WidgetGauge extends LitElement {
             newCanvas.setAttribute('class', 'chart')
             newCanvas.setAttribute(
                 'style',
-                `min-width: ${this.origWidth}; min-height: ${this.origHeight}; width: ${this.origWidth}; height: ${this.origHeight};`
+                `min-width: ${this.origWidth}px; min-height: ${this.origHeight}px; width: ${this.origWidth}px; height: ${this.origHeight}px;`
             )
 
             newWrapper!.appendChild(newTitle)
             newWrapper!.appendChild(newCanvas)
             this.gaugeContainer!.appendChild(newWrapper)
-
             const newChart = echarts.init(newCanvas, this.theme?.theme_name)
             this.canvasList.set(ds.label ?? '', { echart: newChart, title: newTitle, wrapper: newWrapper })
         })
