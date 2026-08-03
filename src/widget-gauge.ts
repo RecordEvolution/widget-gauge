@@ -287,7 +287,7 @@ class WidgetGauge extends LitElement {
                     : ['']
                 distincts.forEach((piv) => {
                     const prefix = piv ?? ''
-                    let label = ds.label?.trim() ?? ''
+                    let label = String(ds.label ?? '').trim()
                     label = prefix + (!!prefix && !!label ? ' - ' : '') + label
                     if (this.dataSets.some((ds) => ds.label === label)) label += ' ' + idx
                     const pds: any = {
@@ -323,6 +323,8 @@ class WidgetGauge extends LitElement {
             if (typeof ds.advanced?.averageLatest !== 'number' || isNaN(ds.advanced?.averageLatest))
                 ds.advanced.averageLatest = 1
             const data = ds?.data?.slice(-ds.advanced?.averageLatest || -1) ?? []
+            const rawGaugeMin = Number(ds.sections?.gaugeMinValue ?? 0)
+            const gaugeMin = isNaN(rawGaugeMin) ? 0 : rawGaugeMin
             if (!ds.multiChart) {
                 ds.needleValue = ds.value === undefined || ds.value === null ? undefined : Number(ds.value)
             } else {
@@ -332,9 +334,7 @@ class WidgetGauge extends LitElement {
                     ?.map(Number) ?? []) as number[]
                 ds.needleValue = (values.reduce((p, c) => p + c, 0) / values.length) as number
             }
-            ds.needleValue = isNaN(ds.needleValue as number)
-                ? (ds.sections?.gaugeMinValue ?? 0)
-                : ds.needleValue
+            ds.needleValue = isNaN(ds.needleValue as number) ? gaugeMin : ds.needleValue
 
             const echart = this.canvasList.get(ds.label)?.echart
             const option = echart?.getOption() ?? window.structuredClone(this.template)
@@ -369,7 +369,6 @@ class WidgetGauge extends LitElement {
             // Axis
             const defaultColors = ['#bf444c', '#d88273', '#f6efa6']
             const themeColors = this.theme?.theme_object?.color ?? defaultColors
-            const gaugeMin = ds.sections?.gaugeMinValue ?? 0
 
             // Filter out entries with null/undefined/empty limits, keeping limits and colors in sync
             const validSections = (ds.sections?.sectionLimits ?? [])
