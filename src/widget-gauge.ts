@@ -324,9 +324,12 @@ class WidgetGauge extends LitElement {
                 ds.advanced.averageLatest = 1
             const data = ds?.data?.slice(-ds.advanced?.averageLatest || -1) ?? []
             if (!ds.multiChart) {
-                ds.needleValue = ds.value as number
+                ds.needleValue = ds.value === undefined || ds.value === null ? undefined : Number(ds.value)
             } else {
-                const values = (data?.map((d) => d.value)?.filter((p) => p !== undefined) ?? []) as number[]
+                const values = (data
+                    ?.map((d) => d.value)
+                    ?.filter((p) => p !== undefined)
+                    ?.map(Number) ?? []) as number[]
                 ds.needleValue = (values.reduce((p, c) => p + c, 0) / values.length) as number
             }
             ds.needleValue = isNaN(ds.needleValue as number)
@@ -359,8 +362,10 @@ class WidgetGauge extends LitElement {
             ga.detail.opacity = 1
             ga.detail.fontSize = 60 * modifier
 
-            ga.detail.formatter = (val: number) =>
-                isNaN(val) ? '-' : val.toFixed(Math.floor(ds.precision ?? 0))
+            ga.detail.formatter = (val: number) => {
+                const num = Number(val)
+                return isNaN(num) ? '-' : num.toFixed(Math.floor(ds.precision ?? 0))
+            }
             // Axis
             const defaultColors = ['#bf444c', '#d88273', '#f6efa6']
             const themeColors = this.theme?.theme_object?.color ?? defaultColors
