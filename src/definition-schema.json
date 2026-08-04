@@ -1,6 +1,21 @@
 {
     "title": "Gauge-chart Configuration",
     "description": "A circular gauge widget for displaying single numeric values within a defined range. Use this widget to show KPIs, sensor readings, progress indicators, or any metric that benefits from a visual representation against minimum and maximum boundaries. Supports color-coded sections to indicate value zones (e.g., normal/warning/critical), multiple gauges in one widget, and automatic pivot-based generation from data columns. Ideal for real-time monitoring dashboards showing temperature, speed, utilization, or similar bounded metrics.",
+    "aiSelection": {
+        "dataShape": "One number per gauge together with the bounds it is read against: dataseries[].data[].value, with sections.gaugeMinValue and sections.sectionLimits[] defining the coloured zones. Optionally a timestamp for freshness and a pivot column producing one gauge per distinct value.",
+        "useWhen": [
+            "A current measurement is only meaningful against a range — a tank at 60% of capacity, a temperature inside or outside its safe band, utilisation against 100%.",
+            "Zones matter: normal, warning and critical should be visible as colour without reading the number.",
+            "One gauge per machine or site should be generated from one column (bind it to data[].pivot)."
+        ],
+        "notFor": [
+            "A number with no natural minimum and maximum — a total, a count, a price. Use widget-value; an invented range makes the dial meaningless.",
+            "How the value got here or where it is heading — a gauge shows only the latest point. Use widget-linechart.",
+            "A share of a total — use widget-doughnut.",
+            "A tank, pump, valve or other industrial asset that should be drawn as itself rather than as a dial — use widget-scada.",
+            "A binary condition — use widget-signal, or widget-switch when it must also be controllable."
+        ]
+    },
     "type": "object",
     "properties": {
         "title": {
