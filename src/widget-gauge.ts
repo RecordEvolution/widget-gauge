@@ -337,7 +337,16 @@ class WidgetGauge extends LitElement {
             ds.needleValue = isNaN(ds.needleValue as number) ? gaugeMin : ds.needleValue
 
             const echart = this.canvasList.get(ds.label)?.echart
-            const option = echart?.getOption() ?? window.structuredClone(this.template)
+            // Always build the option from the template — never from getOption().
+            // Reading the rendered option back and handing it to setOption looks
+            // cheap but is not: getOption() deep-clones the whole stored option on
+            // every frame, and it normalizes every component to an array, so any
+            // future `{ ...option.x }` here would spread an array into `{ '0': x }`
+            // and ECharts would merge that back one level deeper each update until
+            // zrender's recursive merge() overflowed the stack. Both gauge series
+            // and every nested key touched below are declared in the template, so
+            // a clone of it is a complete option in its own right.
+            const option = window.structuredClone(this.template)
             const seriesArr = option.series as GaugeSeriesOption[]
             const ga: any = seriesArr?.[0],
                 ga2: any = seriesArr?.[1]
