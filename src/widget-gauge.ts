@@ -32,7 +32,12 @@ class WidgetGauge extends LitElement {
     @state()
     private canvasList: Map<
         string,
-        { echart?: echarts.ECharts; title?: HTMLHeadingElement; wrapper?: HTMLDivElement }
+        {
+            echart?: echarts.ECharts
+            title?: HTMLHeadingElement
+            wrapper?: HTMLDivElement
+            lastConfig?: string
+        }
     > = new Map()
 
     @state() private themeBgColor?: string
@@ -258,20 +263,23 @@ class WidgetGauge extends LitElement {
         // )
         this.boxes = Array.from(this.gaugeContainer?.querySelectorAll('.chart') as NodeListOf<HTMLDivElement>)
 
-        this.gaugeContainer.style.gridTemplateColumns = `repeat(${fit.c}, 1fr)`
+        const gridColumns = `repeat(${fit.c}, 1fr)`
+        if (this.gaugeContainer.style.gridTemplateColumns !== gridColumns)
+            this.gaugeContainer.style.gridTemplateColumns = gridColumns
 
-        this.boxes?.forEach((box) =>
-            box.setAttribute(
-                'style',
-                `width:${modifier * chartW}px; height:${modifier * (chartH - this.textContainerHeight)}px`
-            )
-        )
+        // This runs on every data tick, not just on real resizes. Touching the
+        // style attribute and calling echart.resize() when nothing changed is
+        // not free: each resize is a full unanimated re-render that also snaps
+        // any running gauge animation, so six gauges hitched on every update.
+        // Only boxes whose target size actually differs are written and resized.
+        const boxStyle = `width:${modifier * chartW}px; height:${modifier * (chartH - this.textContainerHeight)}px`
+        this.boxes?.forEach((box) => {
+            if (box.getAttribute('style') === boxStyle) return
+            box.setAttribute('style', boxStyle)
+            echarts.getInstanceByDom(box)?.resize()
+        })
 
         this.modifier = modifier
-
-        this.canvasList.forEach((canvasObj) => {
-            canvasObj.echart?.resize()
-        })
     }
 
     async transformData() {
@@ -336,45 +344,16 @@ class WidgetGauge extends LitElement {
             }
             ds.needleValue = isNaN(ds.needleValue as number) ? gaugeMin : ds.needleValue
 
-            const echart = this.canvasList.get(ds.label)?.echart
-            // Always build the option from the template — never from getOption().
-            // Reading the rendered option back and handing it to setOption looks
-            // cheap but is not: getOption() deep-clones the whole stored option on
-            // every frame, and it normalizes every component to an array, so any
-            // future `{ ...option.x }` here would spread an array into `{ '0': x }`
-            // and ECharts would merge that back one level deeper each update until
-            // zrender's recursive merge() overflowed the stack. Both gauge series
-            // and every nested key touched below are declared in the template, so
-            // a clone of it is a complete option in its own right.
-            const option = window.structuredClone(this.template)
-            const seriesArr = option.series as GaugeSeriesOption[]
-            const ga: any = seriesArr?.[0],
-                ga2: any = seriesArr?.[1]
-
-            // Needle
-            // Check age of data Latency
-            const tsp = Date.parse(ds?.data?.[0]?.tsp ?? '')
-            if (isNaN(tsp)) {
+            // Blank the gauge when the data is stale. The newest row sits at the
+            // END of the data array (the needle averages `slice(-averageLatest)`),
+            // so that is the row whose age matters. Rows without a parseable tsp
+            // opt out of the check — without timestamps age cannot be judged.
+            const tsp = Date.parse(ds.data?.[ds.data.length - 1]?.tsp ?? '')
+            if (!isNaN(tsp)) {
                 const now = new Date().getTime()
                 if (now - tsp > (ds.advanced?.maxLatency ?? Infinity) * 1000) ds.needleValue = undefined
             }
 
-            ga.data[0].value = ds.needleValue
-            ga.data[0].name = ds.unit
-            // unit style
-
-            ga.title.fontSize = 32 * modifier
-            ga.title.color = ds.valueColor || this.themeTitleColor
-            ga.title.opacity = 1
-            // value style
-            ga.detail.color = ds.valueColor || this.themeTitleColor
-            ga.detail.opacity = 1
-            ga.detail.fontSize = 60 * modifier
-
-            ga.detail.formatter = (val: number) => {
-                const num = Number(val)
-                return isNaN(num) ? '-' : num.toFixed(Math.floor(ds.precision ?? 0))
-            }
             // Axis
             const defaultColors = ['#bf444c', '#d88273', '#f6efa6']
             const themeColors = this.theme?.theme_object?.color ?? defaultColors
@@ -409,9 +388,6 @@ class WidgetGauge extends LitElement {
             const gaugeMax = sectionLimits?.[sectionLimits.length - 1] ?? 100
             ds.range = Math.abs(gaugeMax - gaugeMin)
 
-            ga.min = ga2.min = gaugeMin
-            ga.max = ga2.max = gaugeMax
-
             // percentages of the sections paired with the colors (must be strictly ascending for ECharts)
             const colorSections = sectionLimits
                 .map((limit, i) => {
@@ -420,14 +396,6 @@ class WidgetGauge extends LitElement {
                     return [pct, color] as [number, SectionColor]
                 })
                 .filter(([s]) => !isNaN(s) && s >= 0)
-
-            ga2.axisLine.lineStyle.width = 8 * modifier
-            if (colorSections.length) ga2.axisLine.lineStyle.color = colorSections
-            ga2.axisLabel.fontSize = 24 * modifier
-            // ga2.axisLabel.color = ds.valueColor
-            ga2.axisLabel.distance = -24 * modifier
-            ga2.splitLine.length = 16 * modifier
-            ga2.splitLine.distance = -16 * modifier
 
             // Progress
             let progressColor = colors?.[colors.length - 1]
@@ -440,10 +408,89 @@ class WidgetGauge extends LitElement {
                     break
                 }
             }
+
+            const canvas = this.canvasList.get(ds.label)
+            const echart = canvas?.echart
+
+            // On a live dashboard this loop runs for every gauge on every data
+            // tick, so the steady-state path has to stay off the expensive
+            // full-option merge: everything below except the needle value and
+            // the progress color is configuration that only changes with the
+            // container size (modifier), the widget config, or the theme. When
+            // that signature is unchanged, send ECharts only the two values
+            // that move; the stored option keeps everything else. lazyUpdate
+            // defers processing to the next animation frame so several gauges
+            // updating in the same tick do not each force a synchronous render.
+            const configSig = JSON.stringify([
+                modifier,
+                ds.unit,
+                ds.precision,
+                ds.valueColor,
+                ds.sections,
+                this.themeTitleColor
+            ])
+            if (canvas && canvas.lastConfig === configSig) {
+                echart?.setOption(
+                    {
+                        series: [
+                            {
+                                data: [{ value: ds.needleValue ?? null, name: ds.unit }],
+                                progress: { itemStyle: { color: progressColor } }
+                            }
+                        ]
+                    },
+                    { lazyUpdate: true }
+                )
+                continue
+            }
+            if (canvas) canvas.lastConfig = configSig
+
+            // Always build the option from the template — never from getOption().
+            // Reading the rendered option back and handing it to setOption looks
+            // cheap but is not: getOption() deep-clones the whole stored option on
+            // every frame, and it normalizes every component to an array, so any
+            // future `{ ...option.x }` here would spread an array into `{ '0': x }`
+            // and ECharts would merge that back one level deeper each update until
+            // zrender's recursive merge() overflowed the stack. Both gauge series
+            // and every nested key touched below are declared in the template, so
+            // a clone of it is a complete option in its own right.
+            const option = window.structuredClone(this.template)
+            const seriesArr = option.series as GaugeSeriesOption[]
+            const ga: any = seriesArr?.[0],
+                ga2: any = seriesArr?.[1]
+
+            ga.data[0].value = ds.needleValue
+            ga.data[0].name = ds.unit
+            // unit style
+
+            ga.title.fontSize = 32 * modifier
+            ga.title.color = ds.valueColor || this.themeTitleColor
+            ga.title.opacity = 1
+            // value style
+            ga.detail.color = ds.valueColor || this.themeTitleColor
+            ga.detail.opacity = 1
+            ga.detail.fontSize = 60 * modifier
+
+            ga.detail.formatter = (val: number) => {
+                const num = Number(val)
+                return isNaN(num) ? '-' : num.toFixed(Math.floor(ds.precision ?? 0))
+            }
+
+            ga.min = ga2.min = gaugeMin
+            ga.max = ga2.max = gaugeMax
+
+            ga2.axisLine.lineStyle.width = 8 * modifier
+            if (colorSections.length) ga2.axisLine.lineStyle.color = colorSections
+            ga2.axisLabel.fontSize = 24 * modifier
+            // ga2.axisLabel.color = ds.valueColor
+            ga2.axisLabel.distance = -24 * modifier
+            ga2.splitLine.length = 16 * modifier
+            ga2.splitLine.distance = -16 * modifier
+
             ga.progress.itemStyle.color = progressColor
             ga.progress.width = 60 * modifier
 
-            const titleElement = this.canvasList.get(ds.label)?.title
+            const titleElement = canvas?.title
             if (titleElement) {
                 titleElement.style.fontSize = String(36 * modifier) + 'px'
                 titleElement.style.maxWidth = String(550 * modifier) + 'px'
@@ -452,7 +499,7 @@ class WidgetGauge extends LitElement {
             }
 
             // Apply
-            echart?.setOption(option)
+            echart?.setOption(option, { lazyUpdate: true })
         }
     }
     deleteCharts() {
