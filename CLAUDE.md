@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm run watch` | Build in watch mode only |
 | `npm run types` | Regenerate `src/definition-schema.d.ts` from `src/definition-schema.json` (run after any schema edit) |
 | `npm run analyze` | Regenerate `custom-elements.json` via `cem analyze --litelement` |
-| `npm run release` | `build` -> `npm version patch` -> `git push --tag` -> `build` again. Also see README for the post-release SQL step. |
+| `npm run release` | `npm version patch`: preflight guards (on `main`, clean tree, not behind `origin/main`, generated files current, build passes) → commit + bare-semver tag → `git push --follow-tags` → waits on the CI publish. Also `release:minor` / `release:major`. |
 | `npm run link` / `unlink` | Symlink the built package into `../RESWARM/frontend` for integration testing |
 
 No test runner or linter is configured. Node `>=24.9.0`, npm `>=10.0.2`.
