@@ -65,6 +65,16 @@ class WidgetGauge extends LitElement {
         })
 
         this.template = {
+            // The registered ECharts theme carries its own canvas
+            // `backgroundColor` (chalk paints `rgba(41,52,65,1)`), which the
+            // gauge canvas draws as an opaque slab on top of the wrapper's
+            // background. That hides whatever colour the tile actually has —
+            // the `--re-tile-background-color` the host injects, or a user's
+            // custom colour — so the gauge sits in a differently coloured box.
+            // Forcing the option's background to transparent lets the wrapper's
+            // background show through; the wrapper already falls back to the
+            // theme's own colour when no override is set, so nothing is lost.
+            backgroundColor: 'transparent',
             series: [
                 {
                     type: 'gauge',
