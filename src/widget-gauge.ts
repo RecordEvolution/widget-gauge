@@ -197,13 +197,25 @@ class WidgetGauge extends LitElement {
         this.applyData()
     }
 
+    /**
+     * Resolved text colour for the chart canvas.
+     *
+     * The themeTitleColor field holds a var() chain, which the browser resolves
+     * for CSS but ECharts cannot — it paints to a canvas and needs a real
+     * colour. Read at the point of use rather than cached, so a board style
+     * edit reaches the next chart rebuild instead of waiting for a theme change.
+     */
+    private resolvedTextColor(): string | undefined {
+        return (
+            getComputedStyle(this).getPropertyValue('--re-text-color').trim() ||
+            this.theme?.theme_object?.title?.textStyle?.color
+        )
+    }
+
     registerTheme(theme?: Theme) {
-        const cssTextColor = getComputedStyle(this).getPropertyValue('--re-text-color').trim()
-        const cssBgColor = getComputedStyle(this).getPropertyValue('--re-tile-background-color').trim()
-        this.themeBgColor = cssBgColor || this.theme?.theme_object?.backgroundColor
-        this.themeTitleColor = cssTextColor || this.theme?.theme_object?.title?.textStyle?.color
-        this.themeSubtitleColor =
-            cssTextColor || this.theme?.theme_object?.title?.subtextStyle?.color || this.themeTitleColor
+        this.themeBgColor = `var(--re-tile-background-color, ${this.theme?.theme_object?.backgroundColor || 'transparent'})`
+        this.themeTitleColor = `var(--re-text-color, ${this.theme?.theme_object?.title?.textStyle?.color || 'inherit'})`
+        this.themeSubtitleColor = `var(--re-text-color, ${this.theme?.theme_object?.title?.subtextStyle?.color || this.theme?.theme_object?.title?.textStyle?.color || 'inherit'})`
 
         if (!theme || !theme.theme_object || !theme.theme_name) return
 
@@ -437,7 +449,7 @@ class WidgetGauge extends LitElement {
                 ds.precision,
                 ds.valueColor,
                 ds.sections,
-                this.themeTitleColor
+                this.resolvedTextColor()
             ])
             if (canvas && canvas.lastConfig === configSig) {
                 echart?.setOption(
@@ -474,10 +486,10 @@ class WidgetGauge extends LitElement {
             // unit style
 
             ga.title.fontSize = 32 * modifier
-            ga.title.color = ds.valueColor || this.themeTitleColor
+            ga.title.color = ds.valueColor || this.resolvedTextColor()
             ga.title.opacity = 1
             // value style
-            ga.detail.color = ds.valueColor || this.themeTitleColor
+            ga.detail.color = ds.valueColor || this.resolvedTextColor()
             ga.detail.opacity = 1
             ga.detail.fontSize = 60 * modifier
 
