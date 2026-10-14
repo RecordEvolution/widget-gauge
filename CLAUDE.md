@@ -10,7 +10,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm run build` | Production lib build to `dist/widget-gauge.js` |
 | `npm run watch` | Build in watch mode only |
 | `npm run types` | Regenerate `src/definition-schema.d.ts` from `src/definition-schema.json` (run after any schema edit) |
-| `npm run analyze` | Regenerate `custom-elements.json` via `cem analyze --litelement` |
 | `npm run release` | `npm version patch`: preflight guards (on `main`, clean tree, not behind `origin/main`, generated files current, build passes) → bump + `dist/` rebuild (`version` hook, so the local build registers the new tag) → commit + bare-semver tag → `git push --follow-tags` → waits on the CI publish. Also `release:minor` / `release:major`. |
 | `npm run link` / `unlink` | Symlink the built package into `../RESWARM/frontend` for integration testing |
 
