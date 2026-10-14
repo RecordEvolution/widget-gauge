@@ -48,14 +48,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/RecordEvolution/widget-gauge.git"
+        "url": "git+https://github.com/IronFlock/widget-gauge.git"
     },
     "keywords": [
         "widget",
         "gauge"
     ],
     "bugs": {
-        "url": "https://github.com/RecordEvolution/widget-gauge/issues"
+        "url": "https://github.com/IronFlock/widget-gauge/issues"
     },
-    "homepage": "https://github.com/RecordEvolution/widget-gauge#readme"
+    "homepage": "https://github.com/IronFlock/widget-gauge#readme"
 }
