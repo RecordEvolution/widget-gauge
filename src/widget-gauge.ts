@@ -47,6 +47,8 @@ class WidgetGauge extends LitElement {
     @query('.wrapper') private wrapper?: HTMLDivElement
 
     private resizeObserver: ResizeObserver
+    // inputData or theme changed while detached, so the charts are not up to date
+    private chartsStale = false
 
     boxes?: HTMLDivElement[]
     origWidth: number = 600
@@ -156,11 +158,35 @@ class WidgetGauge extends LitElement {
         }
     }
 
+    connectedCallback() {
+        super.connectedCallback()
+        // firstUpdated observes the first time; after a move (studio's keyed tile
+        // repeat) the wrapper has to be observed again.
+        if (this.hasUpdated && this.wrapper) this.resizeObserver.observe(this.wrapper)
+        // Reattached after disconnectedCallback disposed the charts, or after a change
+        // that setupCharts skipped while detached: rebuild them.
+        if (this.hasUpdated && (this.chartsStale || !this.canvasList.size)) this.rebuildCharts()
+    }
+
     disconnectedCallback() {
         super.disconnectedCallback()
-        if (this.resizeObserver) {
-            this.resizeObserver.disconnect()
-        }
+        this.resizeObserver.disconnect()
+        // ECharts keeps every instance in a global registry until dispose(), and each
+        // one holds its canvases and, through its div, this whole element, so dispose
+        // the charts once the element is really gone. A DOM move (studio's keyed tile
+        // repeat) disconnects and reconnects within one task, so decide after it.
+        setTimeout(() => {
+            if (!this.isConnected) this.deleteCharts()
+        })
+    }
+
+    private rebuildCharts() {
+        this.chartsStale = false
+        this.deleteCharts()
+        this.transformData()
+        this.setupCharts()
+        this.adjustSizes()
+        this.applyData()
     }
 
     update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
@@ -532,6 +558,13 @@ class WidgetGauge extends LitElement {
 
     setupCharts() {
         if (!this.gaugeContainer) return
+        // Detached: make no charts. disconnectedCallback disposes the others, so new
+        // ones would leak if the element never comes back; connectedCallback rebuilds
+        // from the current inputData and theme if it does.
+        if (!this.isConnected) {
+            this.chartsStale = true
+            return
+        }
         // const { width, height } = this.gaugeContainer.getBoundingClientRect()
         // if (!width || !height) return
         // remove the gauge canvases of non provided data series
