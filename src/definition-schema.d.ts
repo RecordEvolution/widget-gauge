@@ -34,7 +34,7 @@ export type MultiChart = boolean;
  */
 export type Value = number;
 /**
- * ISO 8601 timestamp string (e.g., '2023-11-04T22:47:52.351152+00:00'). Used to detect data age and apply maxLatency filtering if configured.
+ * The time of the reading. A bound timestamp column arrives as epoch milliseconds; a static value can be an ISO 8601 string, such as '2023-11-04T22:47:52Z'. Used with Maximum Latency to hide stale readings.
  */
 export type Timestamp = string;
 /**
@@ -75,7 +75,7 @@ export type SectionRightLimits = {
  */
 export type AverageLatestValues = number;
 /**
- * Maximum age (in seconds) for data to be displayed. If the latest data point's timestamp is older than this threshold, the gauge shows no value or a stale indicator. Useful for detecting sensor offline conditions.
+ * Maximum age in seconds of the newest reading. When the newest data row's Timestamp is older, the gauge shows '-' instead of a value, also while no new data arrives, which makes a sensor going offline visible. Needs Multi Chart with a Timestamp in the data rows: a single Value carries no time. Leave it empty for no limit.
  */
 export type MaximumLatencyInSeconds = number;
 /**

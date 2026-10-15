@@ -6,7 +6,7 @@ import * as echarts from 'echarts/core'
 import { TooltipComponent } from 'echarts/components'
 import { GaugeChart, GaugeSeriesOption } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
-import { EChartsOption, SeriesOption } from 'echarts'
+import type { EChartsOption, SeriesOption } from 'echarts'
 
 echarts.use([TooltipComponent, GaugeChart, CanvasRenderer])
 
@@ -15,6 +15,42 @@ type Data = Exclude<Dataseries['data'], undefined>[number]
 type Theme = {
     theme_name: string
     theme_object: any
+}
+
+// A bound timestamp column arrives as epoch milliseconds, which Date.parse turns
+// into NaN; a static config, or a live row from an appliance with an older
+// fleetdb, may hold an ISO 8601 string instead. Anything else is not a point in
+// time and comes back undefined.
+const toDate = (value: unknown): Date | undefined => {
+    if (value === null || value === undefined || value === '') return undefined
+    const ms = /^\s*-?\d+(\.\d+)?\s*$/.test(String(value)) ? Number(value) : Date.parse(String(value))
+    return Number.isFinite(ms) ? new Date(ms) : undefined
+}
+
+// A finite number, or undefined for null, '', NaN and anything else that is not numeric.
+const toNumber = (value: unknown): number | undefined => {
+    if (value === null || value === undefined || value === '') return undefined
+    const number = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(number) ? number : undefined
+}
+
+// Decimals for toFixed(), which throws outside 0-100.
+const fractionDigits = (precision: unknown): number => {
+    const digits = Math.floor(Number(precision))
+    return Number.isFinite(digits) ? Math.min(100, Math.max(0, digits)) : 0
+}
+
+/**
+ * When a gauge's value goes stale, in epoch milliseconds: the newest row's
+ * timestamp plus Maximum Latency. Undefined when it never does, because no
+ * latency is set or the newest row (the last one: rows arrive oldest first) has
+ * no readable timestamp.
+ */
+const staleAt = (rows: unknown, maxLatency: unknown): number | undefined => {
+    const seconds = toNumber(maxLatency)
+    const newest = Array.isArray(rows) ? rows[rows.length - 1] : undefined
+    const tsp = newest && typeof newest === 'object' ? toDate((newest as Data).tsp) : undefined
+    return seconds === undefined || !tsp ? undefined : tsp.getTime() + seconds * 1000
 }
 
 export
@@ -49,6 +85,10 @@ class WidgetGauge extends LitElement {
     private resizeObserver: ResizeObserver
     // inputData or theme changed while detached, so the charts are not up to date
     private chartsStale = false
+    // Re-runs applyData when the next gauge's data passes Maximum Latency. Studio
+    // sends no new inputData while a device is silent, so without it the last
+    // value would stay on screen however old it gets.
+    private staleTimer?: ReturnType<typeof setTimeout>
 
     boxes?: HTMLDivElement[]
     origWidth: number = 600
@@ -166,11 +206,16 @@ class WidgetGauge extends LitElement {
         // Reattached after disconnectedCallback disposed the charts, or after a change
         // that setupCharts skipped while detached: rebuild them.
         if (this.hasUpdated && (this.chartsStale || !this.canvasList.size)) this.rebuildCharts()
+        // After a move: re-check the data's age and re-arm the stale timer that
+        // disconnectedCallback cleared.
+        else if (this.hasUpdated) this.applyData()
     }
 
     disconnectedCallback() {
         super.disconnectedCallback()
         this.resizeObserver.disconnect()
+        clearTimeout(this.staleTimer)
+        this.staleTimer = undefined
         // ECharts keeps every instance in a global registry until dispose(), and each
         // one holds its canvases and, through its div, this whole element, so dispose
         // the charts once the element is really gone. A DOM move (studio's keyed tile
@@ -339,9 +384,14 @@ class WidgetGauge extends LitElement {
         dataseries
             .sort((a, b) => ((a.label ?? '') > (b.label ?? '') ? 1 : -1))
             .forEach((ds, idx) => {
+                // Rows that are not objects (a null slot, a non-list `data`) carry no
+                // reading; reading d.pivot from them would throw.
+                const rows = Array.isArray(ds.data)
+                    ? ds.data.filter((d): d is Data => !!d && typeof d === 'object')
+                    : []
                 // pivot data
                 const distincts = ds.multiChart
-                    ? ([...new Set(ds.data?.map((d: Data) => d.pivot))].sort() as string[])
+                    ? ([...new Set(rows.map((d: Data) => d.pivot))].sort() as string[])
                     : ['']
                 distincts.forEach((piv) => {
                     const prefix = piv ?? ''
@@ -357,7 +407,7 @@ class WidgetGauge extends LitElement {
                         sections: ds.sections,
                         multiChart: ds.multiChart,
                         value: ds.value,
-                        data: distincts.length === 1 ? ds.data : ds?.data?.filter((d) => d.pivot === piv)
+                        data: distincts.length === 1 ? rows : rows.filter((d) => d.pivot === piv)
                     }
                     this.dataSets.push(pds)
                 })
@@ -373,6 +423,9 @@ class WidgetGauge extends LitElement {
 
         this.dataSets.sort((a, b) => ((a.label as string) > (b.label as string) ? 1 : -1))
 
+        const now = Date.now()
+        // the earliest moment a gauge that is fresh now goes stale
+        let nextStaleAt = Infinity
         for (const ds of this.dataSets) {
             // compute derivative values
             // filter latest values and calculate average
@@ -386,23 +439,20 @@ class WidgetGauge extends LitElement {
             if (!ds.multiChart) {
                 ds.needleValue = ds.value === undefined || ds.value === null ? undefined : Number(ds.value)
             } else {
-                const values = (data
-                    ?.map((d) => d.value)
-                    ?.filter((p) => p !== undefined)
-                    ?.map(Number) ?? []) as number[]
+                // A missing, empty or non-numeric reading is no reading: skip it rather
+                // than average it in as 0 (Number(null)) or as NaN.
+                const values = data.map((d) => toNumber(d.value)).filter((v): v is number => v !== undefined)
                 ds.needleValue = (values.reduce((p, c) => p + c, 0) / values.length) as number
             }
             ds.needleValue = isNaN(ds.needleValue as number) ? gaugeMin : ds.needleValue
 
-            // Blank the gauge when the data is stale. The newest row sits at the
-            // END of the data array (the needle averages `slice(-averageLatest)`),
-            // so that is the row whose age matters. Rows without a parseable tsp
-            // opt out of the check — without timestamps age cannot be judged.
-            const tsp = Date.parse(ds.data?.[ds.data.length - 1]?.tsp ?? '')
-            if (!isNaN(tsp)) {
-                const now = new Date().getTime()
-                if (now - tsp > (ds.advanced?.maxLatency ?? Infinity) * 1000) ds.needleValue = undefined
-            }
+            // Blank the gauge when its data is older than Maximum Latency. Only Multi
+            // Chart gauges have rows, and so a timestamp: a single Value carries none,
+            // and a `data` list its condition hides is not what this gauge shows.
+            // Rows without a readable tsp opt out, since their age cannot be judged.
+            const expiresAt = ds.multiChart ? staleAt(ds.data, ds.advanced?.maxLatency) : undefined
+            if (expiresAt !== undefined && now > expiresAt) ds.needleValue = undefined
+            else if (expiresAt !== undefined) nextStaleAt = Math.min(nextStaleAt, expiresAt)
 
             // Axis
             const defaultColors = ['#bf444c', '#d88273', '#f6efa6']
@@ -485,7 +535,10 @@ class WidgetGauge extends LitElement {
                         series: [
                             {
                                 data: [{ value: ds.needleValue ?? null, name: ds.unit }],
-                                progress: { itemStyle: { color: progressColor } }
+                                progress: {
+                                    show: ds.needleValue !== undefined,
+                                    itemStyle: { color: progressColor }
+                                }
                             }
                         ]
                     },
@@ -523,7 +576,7 @@ class WidgetGauge extends LitElement {
 
             ga.detail.formatter = (val: number) => {
                 const num = Number(val)
-                return isNaN(num) ? '-' : num.toFixed(Math.floor(ds.precision ?? 0))
+                return isNaN(num) ? '-' : num.toFixed(fractionDigits(ds.precision))
             }
 
             ga.min = ga2.min = gaugeMin
@@ -539,6 +592,9 @@ class WidgetGauge extends LitElement {
 
             ga.progress.itemStyle.color = progressColor
             ga.progress.width = 60 * modifier
+            // A blank (stale) gauge draws no arc. ECharts would size and stack it
+            // from a NaN value ("z / z2 / zlevel of displayable is invalid").
+            ga.progress.show = ds.needleValue !== undefined
 
             const titleElement = canvas?.title
             if (titleElement) {
@@ -551,7 +607,24 @@ class WidgetGauge extends LitElement {
             // Apply
             echart?.setOption(option, { lazyUpdate: true })
         }
+        this.scheduleStaleCheck(nextStaleAt)
     }
+
+    /** Runs applyData again just after `at` (epoch ms), when the next gauge goes stale. */
+    private scheduleStaleCheck(at: number) {
+        clearTimeout(this.staleTimer)
+        this.staleTimer = undefined
+        // Nothing goes stale, or detached: connectedCallback re-checks on return.
+        if (!Number.isFinite(at) || !this.isConnected) return
+        // setTimeout fires at once for delays above 2^31 - 1 ms (about 24.8 days);
+        // a capped wait only re-checks and re-arms.
+        const delay = Math.min(Math.max(at - Date.now(), 0) + 1, 2 ** 31 - 1)
+        this.staleTimer = setTimeout(() => {
+            this.staleTimer = undefined
+            this.applyData()
+        }, delay)
+    }
+
     deleteCharts() {
         this.canvasList.forEach((canvasObj, label) => {
             canvasObj.echart?.dispose()

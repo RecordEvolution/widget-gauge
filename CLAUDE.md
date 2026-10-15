@@ -27,6 +27,8 @@ This is one widget in a multi-repo IronFlock widget ecosystem (sibling `widget-*
 
 Theming: `registerTheme()` resolves the text colour as a `var(--re-text-color, <theme value>)` chain rather than reading the host's custom properties through `getComputedStyle`. The host property still wins over `theme_object`, but nothing is snapshotted, so a board style edit repaints the tile live. The widget paints no background of its own: studio's `widget-item` already paints `--re-tile-background-color` on the tile, and painting it again here composited a translucent tile colour twice. ECharts cannot resolve a `var()` chain (it paints to a canvas), so the few canvas colours go through `resolvedTextColor()`, which reads the property at the point of use.
 
+**Data age (Maximum Latency):** only Multi Chart gauges have data rows and so a timestamp; a single `value` carries no time. `applyData()` blanks a gauge (value `-`, no progress arc) when its newest row's `tsp` is older than `advanced.maxLatency` seconds. `tsp` is parsed with `toDate()`, because a bound timestamp column arrives as epoch milliseconds, which `Date.parse` turns into `NaN` (up to 1.7.43 the check therefore never ran for bound data); ISO strings from static configs work too. Studio sends no new `inputData` while a device is silent, so `scheduleStaleCheck()` keeps one timer that re-runs `applyData()` when the next gauge goes stale; `disconnectedCallback()` clears it and `connectedCallback()` re-checks after a move. Averages skip empty and non-numeric readings instead of counting them as 0, and `transformData()` skips null rows.
+
 
 **Schema-driven config UI:** `src/definition-schema.json` is JSON Schema with IronFlock extensions; the dashboard auto-generates the config form from it. Custom keywords:
 - `"type": "color"` -> color picker
@@ -45,15 +47,11 @@ Workflow: edit `definition-schema.json` -> `npm run types` -> import the regener
 
 **Demo harness (`demo/index.html`):** imports the source TS directly and constructs the versioned tag from `package.json`. It uses `ObjectRandomizer.js` (loaded via CDN) plus `keyPathsToRandomize` to mutate `inputData` once per second — useful for visually testing reactivity. Adjust the array to exercise specific data paths.
 
-## Release & Platform Registration
+## Release & Platform Rollout
 
-`npm run release` bumps the patch version, pushes the tag, and a GitHub Action publishes to npm. Then notify the IronFlock platform with the new version:
+`npm run release` bumps the patch version, pushes the tag, and a GitHub Action publishes to npm. A published version reaches boards only after the platform's rollout (Studio's dependency pin, the platform database's widget registration); IronFlock developers find those steps in the internal runbook `docs/INTERNAL-widget-platform.md` of the deployments repository.
 
-```sql
-select swarm.f_update_widget_master('{"package_name": "widget-gauge", "version": "X.Y.Z"}'::jsonb);
-```
-
-For local platform testing, `npm run build` first so the version baked into the bundle matches, then restart the node web server container. If the widget is referenced in `dashboard-template.yml`, update the version there too.
+For local platform testing, run Studio's dev server with this repo checked out in `../ironflock-widgets/` next to `studio/`, and `npm run watch` here; Studio imports the built `dist/`, so a tile renders it only when its pinned version equals `package.json`'s.
 
 ## `aiSelection` in `src/definition-schema.json`
 
