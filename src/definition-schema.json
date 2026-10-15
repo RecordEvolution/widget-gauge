@@ -11,7 +11,7 @@
         "notFor": [
             "A number with no natural minimum and maximum — a total, a count, a price. Use widget-value; an invented range makes the dial meaningless.",
             "How the value got here or where it is heading — a gauge shows only the latest point. Use widget-linechart.",
-            "A share of a total — use widget-doughnut.",
+            "A share of a total — use widget-doughnut when the parts are a fixed set that arrive as columns of one row (or as one value each); when the parts are rows of the result (one row per cause or program), use widget-linechart with dataseries[].type: 'bar'.",
             "A tank, pump, valve or other industrial asset that should be drawn as itself rather than as a dial — use widget-scada.",
             "A binary condition — use widget-signal, or widget-switch when it must also be controllable."
         ]
