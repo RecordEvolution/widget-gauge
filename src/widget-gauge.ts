@@ -332,8 +332,12 @@ class WidgetGauge extends LitElement {
         // console.log('Transforming data', this.inputData?.dataseries)
         this.dataSets = []
         if (!this?.inputData) return
-        this.inputData.dataseries
-            ?.sort((a, b) => ((a.label ?? '') > (b.label ?? '') ? 1 : -1))
+        // Sort a copy without null list slots: the config belongs to the host, so it is
+        // read but never reordered.
+        const list = this.inputData.dataseries
+        const dataseries = Array.isArray(list) ? list.filter((ds) => ds && typeof ds === 'object') : []
+        dataseries
+            .sort((a, b) => ((a.label ?? '') > (b.label ?? '') ? 1 : -1))
             .forEach((ds, idx) => {
                 // pivot data
                 const distincts = ds.multiChart
@@ -373,10 +377,10 @@ class WidgetGauge extends LitElement {
             // compute derivative values
             // filter latest values and calculate average
             ds.label ??= ''
-            ds.advanced ??= {}
-            if (typeof ds.advanced?.averageLatest !== 'number' || isNaN(ds.advanced?.averageLatest))
-                ds.advanced.averageLatest = 1
-            const data = ds?.data?.slice(-ds.advanced?.averageLatest || -1) ?? []
+            // ds.advanced is the host's own object: read the setting, never write it back
+            const n = ds.advanced?.averageLatest
+            const averageLatest = typeof n === 'number' && !isNaN(n) ? n : 1
+            const data = ds?.data?.slice(-averageLatest || -1) ?? []
             const rawGaugeMin = Number(ds.sections?.gaugeMinValue ?? 0)
             const gaugeMin = isNaN(rawGaugeMin) ? 0 : rawGaugeMin
             if (!ds.multiChart) {
